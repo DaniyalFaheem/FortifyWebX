@@ -3,42 +3,56 @@
   
   <url>
     <loc>https://www.fortifywebx.tech/</loc>
-    <lastmod>2026-04-26</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.00</priority>
   </url>
 
   <url>
-    <loc>https://www.fortifywebx.tech/#services</loc>
-    <lastmod>2026-04-26</lastmod>
+    <loc>https://www.fortifywebx.tech/insights.html</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <url>
+    <loc>https://www.fortifywebx.tech/vapt-vs-scanners.html</loc>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
 
   <url>
-    <loc>https://www.fortifywebx.tech/#work</loc>
-    <lastmod>2026-04-26</lastmod>
+    <loc>https://www.fortifywebx.tech/headless-architecture.html</loc>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.80</priority>
   </url>
 
   <url>
-    <loc>https://www.fortifywebx.tech/#contact</loc>
-    <lastmod>2026-04-26</lastmod>
+    <loc>https://www.fortifywebx.tech/ai-search-seo.html</loc>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.70</priority>
+    <priority>0.80</priority>
+  </url>
+
+  <url>
+    <loc>https://www.fortifywebx.tech/trust-in-ui-ux.html</loc>
+    <lastmod>2026-04-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
   </url>
 
   <url>
     <loc>https://www.fortifywebx.tech/privacy.html</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
 
   <url>
     <loc>https://www.fortifywebx.tech/terms.html</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-04-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
