@@ -68,6 +68,15 @@
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+      
+      // Default consent setup (Denied)
+      gtag('consent', 'default', {
+        'analytics_storage': 'denied',
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied'
+      });
+
       gtag('js', new Date());
       gtag('config', 'G-1XDQBDWML2');
     </script>
@@ -450,15 +459,41 @@
         </div>
     </footer>
 
-    <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-brand-dark border-t border-white/10 p-4 sm:p-6 z-[100] flex flex-col sm:flex-row items-center justify-between gap-4 transition-transform duration-500 shadow-2xl">
+    <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 bg-brand-dark border-t border-white/10 p-4 sm:p-6 z-[100] flex flex-col sm:flex-row items-center justify-between gap-4 transition-transform duration-500 shadow-2xl" style="display: none;">
         <div class="text-gray-300 text-sm text-center sm:text-left max-w-4xl">
             We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic to deliver the best possible digital solutions. By clicking "Accept All", you consent to our use of cookies. <a href="privacy.html" class="text-brand-cyan hover:underline">Read Privacy Policy</a>.
         </div>
         <div class="flex gap-3 shrink-0">
-            <button onclick="document.getElementById('cookie-banner').style.display='none'" aria-label="Decline Cookies" class="px-4 py-2 border border-gray-500 text-gray-300 rounded hover:bg-gray-800 transition text-sm">Decline</button>
-            <button onclick="document.getElementById('cookie-banner').style.display='none'" aria-label="Accept All Cookies" class="px-4 py-2 bg-brand-blue text-white font-bold rounded hover:bg-blue-700 transition text-sm">Accept All</button>
+            <button onclick="declineCookies()" aria-label="Decline Cookies" class="px-4 py-2 border border-gray-500 text-gray-300 rounded hover:bg-gray-800 transition text-sm">Decline</button>
+            <button onclick="acceptCookies()" aria-label="Accept All Cookies" class="px-4 py-2 bg-brand-blue text-white font-bold rounded hover:bg-blue-700 transition text-sm">Accept All</button>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Sirf tab dikhao jab pehle se accept ya decline na hua ho
+            if (!localStorage.getItem('cookieConsent')) {
+                document.getElementById('cookie-banner').style.display = 'flex';
+            }
+        });
+
+        function acceptCookies() {
+            // Google ko Granted ka signal bhejna
+            gtag('consent', 'update', {
+                'analytics_storage': 'granted',
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted'
+            });
+            localStorage.setItem('cookieConsent', 'accepted');
+            document.getElementById('cookie-banner').style.display = 'none';
+        }
+
+        function declineCookies() {
+            localStorage.setItem('cookieConsent', 'declined');
+            document.getElementById('cookie-banner').style.display = 'none';
+        }
+    </script>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" defer></script>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js" defer></script>
