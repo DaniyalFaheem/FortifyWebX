@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FortifyWebX | Internship Assessment Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0B132B; color: white; overflow-x: hidden; }
+        .gradient-text { background: linear-gradient(90deg, #00D4FF, #1A56DB); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #video-preview, #mini-video-preview { transform: scaleX(-1); }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .loader { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #00D4FF; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative">
+
+    <div id="security-violation-screen" class="fixed inset-0 bg-black/95 z-[9999] flex flex-col items-center justify-center hidden p-4 text-center backdrop-blur-md">
+        <i id="violation-icon" class="fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4 animate-bounce"></i>
+        <h2 id="violation-title" class="text-3xl font-bold text-white mb-2">SECURITY VIOLATION DETECTED</h2>
+        <p id="violation-desc" class="text-gray-400 max-w-md mb-6">The assessment will remain paused until the issue is resolved.</p>
+        <button id="resume-fullscreen-btn" onclick="resumeTest()" class="hidden bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-[0_0_15px_rgba(220,38,38,0.5)] transition">
+            Click to Re-Enter Full Screen & Resume Test
+        </button>
+    </div>
+
+    <div id="screen-email" class="glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl transition-all">
+        <img id="brand-logo" src="logo.png" alt="FortifyWebX" class="h-16 mx-auto mb-6 rounded-lg object-contain" onerror="this.src='https://via.placeholder.com/200x64?text=FortifyWebX'">
+        <h2 class="text-2xl font-bold mb-2">Internship Portal</h2>
+        <p class="text-gray-400 text-sm mb-6">Enter your details to access the official assessment.</p>
+        
+        <input type="text" id="user-name" placeholder="Full Name" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
+        <input type="email" id="user-email" placeholder="Registered Email Address" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
+        
+        <button onclick="verifyCandidate()" class="w-full bg-[#1A56DB] hover:bg-[#00D4FF] hover:text-[#0B132B] font-bold py-3 px-6 rounded-lg transition duration-300">
+            Verify & Proceed
+        </button>
+        <p id="email-error" class="text-red-500 text-sm mt-3 hidden">Access Denied. Email not registered in the system.</p>
+        <p id="name-error" class="text-red-500 text-sm mt-3 hidden">Please enter your full name.</p>
+    </div>
+
+    <div id="screen-setup" class="glass-panel p-8 rounded-2xl max-w-lg w-full text-center shadow-2xl hidden transition-all">
+        <h2 class="text-xl font-bold mb-4 text-[#00D4FF]">Identity & Hardware Verification</h2>
+        <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <strong class="text-red-400">The assessment will run in Full-Screen mode.</strong></p>
+        
+        <div class="relative w-full h-56 bg-black rounded-lg overflow-hidden mb-6 border-2 border-dashed border-gray-600" id="video-container">
+            <video id="video-preview" class="w-full h-full object-cover" autoplay muted></video>
+            <div id="scan-line" class="absolute top-0 w-full h-1 bg-[#00D4FF] shadow-[0_0_15px_#00D4FF] hidden opacity-70"></div>
+        </div>
+
+        <button id="start-btn" onclick="startHardwareCheck()" class="w-full bg-[#1A56DB] font-bold py-3 px-6 rounded-lg transition duration-300">
+            Allow Camera/Mic & Scan Face
+        </button>
+    </div>
+
+    <div id="screen-test" class="hidden w-full max-w-3xl glass-panel p-8 rounded-2xl">
+        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+            <h2 class="text-2xl font-bold gradient-text">FortifyWebX Assessment</h2>
+            <div class="text-xl font-mono text-red-400 bg-red-900/30 px-4 py-1 rounded" id="timer">15:00</div>
+        </div>
+        
+        <div id="mcq-container" class="space-y-6 text-gray-200">
+            </div>
+
+        <button onclick="finishTestAndUpload()" class="mt-8 bg-green-600 hover:bg-green-500 font-bold py-3 px-8 rounded-lg transition w-full shadow-[0_0_15px_rgba(22,163,74,0.4)]">
+            Submit Assessment
+        </button>
+    </div>
+
+    <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
+        <div class="loader"></div>
+        <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Syncing Secure Data...</h2>
+        <p class="text-gray-400 text-sm">Please DO NOT close this tab. Your video and answers are being transmitted securely to FortifyWebX servers.</p>
+    </div>
+
+    <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-3xl w-full text-center shadow-2xl">
+        <h2 class="text-3xl font-extrabold mb-2">Assessment Results</h2>
+        <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">⚠️ You have already taken this test! Your saved result is displayed below.</p>
+        
+        <div class="max-w-md mx-auto my-6 bg-gray-800 rounded-full h-6 overflow-hidden relative border border-gray-700">
+            <div id="result-bar" class="bg-gradient-to-r from-[#00D4FF] to-[#1A56DB] h-full transition-all duration-1000" style="width: 0%"></div>
+            <span id="result-percent-text" class="absolute inset-0 flex items-center justify-center font-bold text-sm text-white">0%</span>
+        </div>
+        <div class="text-6xl font-black gradient-text mb-6 text-center" id="final-score">0%</div>
+        
+        <div class="text-left bg-black/40 p-4 rounded-lg mb-8 max-h-48 overflow-y-auto" id="review-container">
+            <h3 class="font-bold text-[#00D4FF] mb-2 border-b border-gray-600 pb-2">Review Your Answers:</h3>
+        </div>
+
+        <canvas id="scorecard-canvas" width="1000" height="700" class="hidden"></canvas>
+
+        <div class="bg-[#1A56DB]/20 border border-[#1A56DB] p-6 rounded-xl mb-8 text-left flex flex-col md:flex-row items-center gap-6">
+            <div class="flex-grow">
+                <h3 class="font-bold text-white text-lg mb-2"><i class="fa-solid fa-certificate text-[#00D4FF] mr-2"></i> Official Certificate & Next Steps</h3>
+                <p class="text-gray-300 text-sm mb-4">Your details have been securely logged. To confirm your entry, download your <strong>Official Eligibility Certificate</strong> and share it on LinkedIn.</p>
+                <p class="text-red-400 font-bold text-xs mb-4 uppercase tracking-widest"><i class="fa-solid fa-bell"></i> Mandatory: Follow all our social media platforms for further updates and next phase announcements.</p>
+                
+                <button onclick="downloadScorecard()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded mb-4 transition flex items-center justify-center gap-2 w-full md:w-auto shadow-[0_0_15px_rgba(22,163,74,0.4)]">
+                    <i class="fa-solid fa-download"></i> Download Premium Certificate
+                </button>
+            </div>
+            <div class="bg-black/40 p-4 rounded-lg border border-white/10 w-full md:w-1/2">
+                <p class="text-xs text-[#00D4FF] mb-1">LinkedIn Post Copy Text:</p>
+                <p class="italic text-gray-300 text-xs mb-3">
+                    I just secured <span id="share-score"></span> in the @FortifyWebX Cyber Security Internship Assessment and am eligible for the next phase! 🚀 #FortifyWebX #CyberSecurity #Internship
+                </p>
+                <a href="https://www.linkedin.com/feed/" target="_blank" class="bg-[#0077b5] hover:bg-[#005582] text-white font-bold py-2 px-4 rounded transition block text-center text-sm">Open LinkedIn &rarr;</a>
+            </div>
+        </div>
+        
+        <div class="border-t border-gray-700 pt-6">
+            <p class="font-bold text-white mb-4 text-center">Follow for Official Updates:</p>
+            <div class="flex justify-center gap-6 text-2xl">
+                <a href="https://www.linkedin.com/company/fortifywebx/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="https://www.facebook.com/people/FortifyWebx/61589326433616/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/fortifywebx/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div id="mini-video-container" class="hidden fixed bottom-4 right-4 w-40 h-32 bg-black border-2 border-red-500 rounded-lg overflow-hidden shadow-2xl z-50">
+        <video id="mini-video-preview" class="w-full h-full object-cover" autoplay muted></video>
+    </div>
+
+    <script>
+        const ALLOWED_EMAILS = [
+            "daniyalfaheem156@gmail.com","zenexus.pentest@gmail.com","abubakararshad4020@gmail.com","sarmadhayat2019@gmail.com",
+            "malak56yaseen@gmail.com","saeedahmad0323325078809@gmail.com","usmanghaniw890@gmail.com","junaidfps@gmail.com",
+            "zaragotamail@gmail.com","maryamamjadedu.22@gmail.com","bolasiwajuola@gmail.com","zahhaktariq@gmail.com",
+            "logsgamer507@gmail.com","toobaghazi19@gmail.com","221544@students.au.edu.pk","amans260304@gmail.com",
+            "youshakamal924@gmail.com","hamzaanjum77@gmail.com","ahmedmuneeb812@gmail.com","znaeem445@gmail.com",
+            "insiabatool83@gmail.com","umairwajiha50@gmail.com","mamoongondal06@gmail.com","h.sultan013578@gmail.com",
+            "juttgill21336@gmail.com","mamoongondal09@gmail.com","maqil3293@gmail.com","farooqtariq211@gmail.com",
+            "ochelights@gmail.com","abhisheksingh740906@gmail.com","kambalavihitha@gmail.com","bhattiabdurehman987@gmail.com",
+            "aa.ayeshaarif@gmail.com","samtextechnology.info@gmail.com","muhamad.huzaiffa@gmail.com","abdullahjutt4102004@gmail.com",
+            "kamalchalumuri@gmail.com"
+        ];
+        
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdsXrqliNS717VOBA7xgv8hLYdRyQwRMvkPp9-vWFUKqxNs6oT708dFNL-ZAPZX6e05g/exec"; 
+
+        const questions = [
+            { id: 1, q: "Which tool is best for analyzing network traffic?", options: ["Nmap", "Wireshark", "Metasploit", "Burp Suite"], answer: 1 },
+            { id: 2, q: "What does SQLi stand for?", options: ["Secure Query Language Internet", "Structured Query Language Injection", "System Query Link Integration", "None"], answer: 1 },
+            { id: 3, q: "Which of these is a common vulnerability in web applications?", options: ["Cross-Site Scripting (XSS)", "Ethernet Spoofing", "MAC Flooding", "BIOS Flashing"], answer: 0 }
+        ];
+
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        let userEmail = "";
+        let userName = "";
+        let proctorInterval;
+        let isTestActive = false;
+
+        function verifyCandidate() {
+            const nameInput = document.getElementById('user-name').value.trim();
+            const emailInput = document.getElementById('user-email').value.trim().toLowerCase();
+            
+            document.getElementById('name-error').classList.add('hidden');
+            document.getElementById('email-error').classList.add('hidden');
+
+            if (!nameInput) {
+                document.getElementById('name-error').classList.remove('hidden');
+                return;
+            }
+
+            if (ALLOWED_EMAILS.includes(emailInput)) {
+                userEmail = emailInput;
+                userName = nameInput;
+                
+                // Store Name in LocalStorage as well
+                if (localStorage.getItem(`fwx_done_${userEmail}`)) {
+                    userName = localStorage.getItem(`fwx_name_${userEmail}`) || userName;
+                    showSavedResults();
+                    return;
+                }
+                
+                document.getElementById('screen-email').classList.add('hidden');
+                document.getElementById('screen-setup').classList.remove('hidden');
+            } else {
+                document.getElementById('email-error').classList.remove('hidden');
+            }
+        }
+
+        async function startHardwareCheck() {
+            const startBtn = document.getElementById('start-btn');
+            startBtn.innerText = "Requesting Access...";
+            startBtn.disabled = true;
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 320, height: 240, frameRate: 15 }, 
+                    audio: true 
+                });
+                
+                document.getElementById('video-preview').srcObject = stream;
+                startBtn.innerText = "Scanning Face Visibility...";
+                
+                const scanLine = document.getElementById('scan-line');
+                scanLine.classList.remove('hidden');
+                let position = 0, direction = 1;
+                const scanInterval = setInterval(() => {
+                    position += 5 * direction;
+                    if(position > 200 || position < 0) direction *= -1;
+                    scanLine.style.transform = `translateY(${position}px)`;
+                }, 50);
+
+                setTimeout(() => {
+                    clearInterval(scanInterval);
+                    scanLine.classList.add('hidden');
+                    document.getElementById('video-container').classList.replace('border-gray-600', 'border-green-500');
+                    startBtn.innerText = "Face Verified. Start Assessment";
+                    startBtn.classList.replace('bg-[#1A56DB]', 'bg-green-600');
+                    startBtn.disabled = false;
+                    startBtn.onclick = startAssessment; 
+                }, 3000);
+
+            } catch (err) {
+                alert("Camera & Microphone access is required to proceed!");
+                startBtn.innerText = "Try Again";
+                startBtn.disabled = false;
+            }
+        }
+
+        function enterFullScreen() {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) docElm.requestFullscreen();
+            else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen();
+            else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
+        }
+
+        function startAssessment() {
+            enterFullScreen(); 
+            isTestActive = true;
+
+            document.getElementById('screen-setup').classList.add('hidden');
+            document.getElementById('screen-test').classList.remove('hidden');
+            document.getElementById('mini-video-preview').srcObject = stream;
+            document.getElementById('mini-video-container').classList.remove('hidden');
+
+            renderQuestions();
+            startRecording();
+            startTimer(15 * 60);
+
+            proctorInterval = setInterval(checkCameraTape, 1000);
+        }
+
+        function startRecording() {
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.start();
+        }
+
+        function checkCameraTape() {
+            if (!isTestActive) return;
+            const video = document.getElementById('mini-video-preview');
+            if (!video || video.paused || video.ended) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 32; canvas.height = 24;
+            const ctx = canvas.getContext('2d');
+            try {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                let total = 0;
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    total += (imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114);
+                }
+                let avgBrightness = total / (canvas.width * canvas.height);
+                
+                let variance = 0;
+                for (let i = 0; i < imgData.data.length; i += 4) {
+                    let p = (imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114);
+                    variance += Math.pow(p - avgBrightness, 2);
+                }
+                variance = variance / (canvas.width * canvas.height);
+
+                const screen = document.getElementById('security-violation-screen');
+                
+                if (avgBrightness < 10 || variance < 40) { 
+                    triggerViolation("CAMERA BLOCKED", "Your camera is covered or dark. Please unblock the lens to continue.", false);
+                } else if (screen.getAttribute('data-type') === 'camera') {
+                    screen.classList.add('hidden');
+                    screen.removeAttribute('data-type');
+                }
+            } catch (e) { console.log(e); }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (isTestActive && !document.fullscreenElement) {
+                triggerViolation("FULL-SCREEN EXITED", "You have exited full-screen mode! Return immediately to avoid disqualification.", true);
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (isTestActive && document.hidden) {
+                triggerViolation("TAB SWITCH DETECTED", "Browser tab switch detected! This is a strict security violation.", true);
+            }
+        });
+
+        function triggerViolation(title, desc, requiresClick) {
+            const screen = document.getElementById('security-violation-screen');
+            document.getElementById('violation-title').innerText = title;
+            document.getElementById('violation-desc').innerText = desc;
+            
+            if (requiresClick) {
+                document.getElementById('violation-icon').className = "fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4 animate-bounce";
+                document.getElementById('resume-fullscreen-btn').classList.remove('hidden');
+                screen.setAttribute('data-type', 'tab');
+            } else {
+                document.getElementById('violation-icon').className = "fa-solid fa-camera-slash text-6xl text-red-500 mb-4 animate-bounce";
+                document.getElementById('resume-fullscreen-btn').classList.add('hidden');
+                screen.setAttribute('data-type', 'camera');
+            }
+            screen.classList.remove('hidden');
+        }
+
+        function resumeTest() {
+            enterFullScreen();
+            document.getElementById('security-violation-screen').classList.add('hidden');
+            document.getElementById('security-violation-screen').removeAttribute('data-type');
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('mcq-container');
+            container.innerHTML = '';
+            questions.forEach((q, index) => {
+                let html = `<div class="bg-black/30 p-5 rounded-xl border border-white/5"><p class="font-bold mb-3 text-lg">${index + 1}. ${q.q}</p><div class="space-y-2">`;
+                q.options.forEach((opt, optIndex) => {
+                    html += `<label class="flex items-center p-3 border border-gray-700 rounded-lg cursor-pointer hover:bg-white/5"><input type="radio" name="q${q.id}" value="${optIndex}" class="mr-3 w-4 h-4">${opt}</label>`;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+        }
+
+        function finishTestAndUpload() {
+            isTestActive = false; 
+            clearInterval(proctorInterval);
+            mediaRecorder.stop();
+            stream.getTracks().forEach(track => track.stop());
+
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+
+            document.getElementById('screen-test').classList.add('hidden');
+            document.getElementById('mini-video-container').classList.add('hidden');
+            document.getElementById('security-violation-screen').classList.add('hidden');
+            document.getElementById('screen-uploading').classList.remove('hidden');
+
+            setTimeout(() => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                
+                reader.onloadend = function() {
+                    const base64data = reader.result.split(',')[1];
+                    const safeEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
+                    const safeName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+                    
+                    const payload = {
+                        filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
+                        mimeType: 'video/webm',
+                        base64: base64data
+                    };
+
+                    fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) })
+                    .then(res => res.text())
+                    .then(() => calculateAndShowResults(true))
+                    .catch(err => { console.error(err); calculateAndShowResults(true); });
+                };
+            }, 1000); 
+        }
+
+        function calculateAndShowResults(isNewRequest) {
+            document.getElementById('screen-uploading').classList.add('hidden');
+            document.getElementById('screen-email').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            let reviewHTML = '';
+            let userScore = 0;
+
+            questions.forEach(q => {
+                const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+                const selectedVal = selected ? parseInt(selected.value) : -1;
+                
+                if (selectedVal === q.answer) {
+                    userScore++;
+                    reviewHTML += `<p class="text-green-400 text-sm mb-2"><i class="fa-solid fa-check mr-2"></i> Q${q.id}: Correct</p>`;
+                } else {
+                    reviewHTML += `<p class="text-red-400 text-sm mb-1"><i class="fa-solid fa-xmark mr-2"></i> Q${q.id}: Incorrect</p>`;
+                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <strong>${q.options[q.answer]}</strong></p>`;
+                }
+            });
+
+            if (isNewRequest) {
+                localStorage.setItem(`fwx_done_${userEmail}`, "true");
+                localStorage.setItem(`fwx_name_${userEmail}`, userName);
+                localStorage.setItem(`fwx_score_${userEmail}`, `${userScore}/${questions.length}`);
+                localStorage.setItem(`fwx_review_${userEmail}`, reviewHTML);
+            }
+
+            renderUIResults(userScore, questions.length, reviewHTML);
+        }
+
+        function showSavedResults() {
+            document.getElementById('screen-email').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+            document.getElementById('already-done-notice').classList.remove('hidden');
+
+            const scoreText = localStorage.getItem(`fwx_score_${userEmail}`);
+            const reviewHTML = localStorage.getItem(`fwx_review_${userEmail}`);
+            const scores = scoreText.split('/');
+            
+            renderUIResults(parseInt(scores[0]), parseInt(scores[1]), reviewHTML);
+        }
+
+        function renderUIResults(score, total, reviewHTML) {
+            const percentage = Math.round((score / total) * 100);
+            
+            document.getElementById('final-score').innerText = `${percentage}%`;
+            document.getElementById('share-score').innerText = `${percentage}%`;
+            document.getElementById('review-container').innerHTML += reviewHTML;
+
+            setTimeout(() => {
+                document.getElementById('result-bar').style.width = `${percentage}%`;
+                document.getElementById('result-percent-text').innerText = `${percentage}%`;
+            }, 200);
+
+            setTimeout(() => drawBrandedScorecard(percentage), 100);
+        }
+
+        // --- HEAVY & PREMIUM CERTIFICATE GENERATOR WITH .PNG FIX ---
+        function drawBrandedScorecard(percentage) {
+            const canvas = document.getElementById('scorecard-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // 1. Premium Dark Background
+            let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, '#040B16');
+            grad.addColorStop(1, '#0B1B42');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Elegant Border
+            ctx.strokeStyle = '#00D4FF';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+
+            const drawContent = () => {
+                // Header
+                ctx.textAlign = "center";
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '900 42px sans-serif';
+                ctx.fillText('CERTIFICATE OF ELIGIBILITY', canvas.width / 2, 280);
+
+                // Body
+                ctx.fillStyle = '#94A3B8';
+                ctx.font = 'italic 22px serif';
+                ctx.fillText('This is to formally certify that', canvas.width / 2, 330);
+
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 38px sans-serif';
+                ctx.fillText(userName.toUpperCase(), canvas.width / 2, 385);
+
+                ctx.fillStyle = '#94A3B8';
+                ctx.font = '20px sans-serif';
+                ctx.fillText('has successfully cleared the FortifyWebX Internship Entry Test with an official score of:', canvas.width / 2, 440);
+
+                // Giant Score 
+                ctx.fillStyle = '#00D4FF';
+                ctx.font = '900 80px sans-serif';
+                ctx.fillText(`${percentage}%`, canvas.width / 2, 540);
+
+                // Eligibility Status
+                if(percentage >= 50) {
+                    ctx.fillStyle = '#22C55E';
+                    ctx.font = 'bold 24px sans-serif';
+                    ctx.fillText('STATUS: OFFICIALLY ELIGIBLE FOR INTERNSHIP PROGRAM', canvas.width / 2, 590);
+                } else {
+                    ctx.fillStyle = '#EF4444';
+                    ctx.font = 'bold 24px sans-serif';
+                    ctx.fillText('STATUS: NOT ELIGIBLE AT THIS TIME', canvas.width / 2, 590);
+                }
+
+                // Social Media Footer Note
+                ctx.fillStyle = '#64748B';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('For further updates and next steps, follow FortifyWebX on all official social media platforms.', canvas.width / 2, 660);
+
+                // Date & Signature
+                const date = new Date().toLocaleDateString();
+                ctx.textAlign = "left";
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '18px sans-serif';
+                ctx.fillText(`Date: ${date}`, 100, 630);
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(100, 640); ctx.lineTo(250, 640); ctx.stroke();
+
+                ctx.textAlign = "right";
+                ctx.fillText('Daniyal Faheem (CEO)', canvas.width - 100, 630);
+                ctx.beginPath(); ctx.moveTo(canvas.width - 300, 640); ctx.lineTo(canvas.width - 100, 640); ctx.stroke();
+            };
+
+            const logo = new Image();
+            
+            logo.onload = () => {
+                const logoWidth = 200; 
+                const logoHeight = (logo.height / logo.width) * logoWidth;
+                ctx.drawImage(logo, (canvas.width - logoWidth) / 2, 70, logoWidth, logoHeight); 
+                drawContent();
+            };
+            
+            logo.onerror = () => {
+                ctx.textAlign = "center";
+                ctx.fillStyle = '#00D4FF';
+                ctx.font = 'bold 30px sans-serif';
+                ctx.fillText('FORTIFYWEBX CYBER SECURITY', canvas.width / 2, 140);
+                drawContent();
+            };
+            
+            // Reverted back to logo.png
+            logo.src = 'logo.png'; 
+        }
+
+        function downloadScorecard() {
+            const canvas = document.getElementById('scorecard-canvas');
+            try {
+                const image = canvas.toDataURL("image/jpeg", 0.9);
+                const link = document.createElement('a');
+                const safeName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+                link.download = `FortifyWebX_Certificate_${safeName}.jpg`;
+                link.href = image;
+                link.click();
+            } catch (err) {
+                alert("Security policy prevented download. Right-click the certificate area to save.");
+            }
+        }
+
+        function startTimer(duration) {
+            let timer = duration, m, s;
+            let display = document.getElementById('timer');
+            let interval = setInterval(() => {
+                m = parseInt(timer / 60, 10); s = parseInt(timer % 60, 10);
+                display.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+                if (--timer < 0) { clearInterval(interval); finishTestAndUpload(); }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
