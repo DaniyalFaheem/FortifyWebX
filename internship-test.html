@@ -156,6 +156,7 @@
         let userName = "";
         let proctorInterval;
         let isTestActive = false;
+        let testStartTime = 0; // NEW: Timer Track logic
 
         function verifyCandidate() {
             const nameInput = document.getElementById('user-name').value.trim();
@@ -236,6 +237,7 @@
         function startAssessment() {
             enterFullScreen(); 
             isTestActive = true;
+            testStartTime = Date.now(); // Start exact timing
 
             document.getElementById('screen-setup').classList.add('hidden');
             document.getElementById('screen-test').classList.remove('hidden');
@@ -255,14 +257,12 @@
             mediaRecorder.start();
         }
 
-        // --- NEW ENHANCED ANTI-CHEAT SYSTEM ---
         function checkCameraTape() {
             if (!isTestActive) return;
             const video = document.getElementById('mini-video-preview');
             if (!video || video.paused || video.ended) return;
 
             const canvas = document.createElement('canvas');
-            // Higher resolution for better detail analysis
             canvas.width = 64; 
             canvas.height = 48;
             const ctx = canvas.getContext('2d');
@@ -275,7 +275,6 @@
                 const grayValues = [];
 
                 for (let i = 0; i < data.length; i += 4) {
-                    // Standard luminance formula
                     const gray = (data[i] * 0.299) + (data[i+1] * 0.587) + (data[i+2] * 0.114);
                     grayValues.push(gray);
                     totalBrightness += gray;
@@ -283,7 +282,6 @@
 
                 let avgBrightness = totalBrightness / grayValues.length;
 
-                // Calculate Standard Deviation (Detail level)
                 let sumOfSquaredDiffs = 0;
                 for (let i = 0; i < grayValues.length; i++) {
                     sumOfSquaredDiffs += Math.pow(grayValues[i] - avgBrightness, 2);
@@ -293,7 +291,6 @@
 
                 const screen = document.getElementById('security-violation-screen');
                 
-                // Detection: Very dark (< 25) OR Very Flat/Covered with tape/hand (stdDev < 15)
                 if (avgBrightness < 25 || stdDev < 15) { 
                     triggerViolation("CAMERA BLOCKED", "Your camera lens is covered, taped, or in complete darkness. Please unblock it to continue.", false);
                 } else if (screen.getAttribute('data-type') === 'camera') {
@@ -354,6 +351,21 @@
         function finishTestAndUpload() {
             isTestActive = false; 
             clearInterval(proctorInterval);
+            
+            // Calculate Time Taken
+            let timeTakenMs = Date.now() - testStartTime;
+            let timeTakenMins = Math.floor(timeTakenMs / 60000);
+            let timeTakenSecs = Math.floor((timeTakenMs % 60000) / 1000);
+            let exactTimeStr = `${timeTakenMins}m ${timeTakenSecs}s`;
+
+            // Calculate Score before sending
+            let userScore = 0;
+            questions.forEach(q => {
+                const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+                if (selected && parseInt(selected.value) === q.answer) userScore++;
+            });
+            let percentage = Math.round((userScore / questions.length) * 100) + "%";
+
             mediaRecorder.stop();
             stream.getTracks().forEach(track => track.stop());
 
@@ -379,7 +391,11 @@
                     const payload = {
                         filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
                         mimeType: 'video/webm',
-                        base64: base64data
+                        base64: base64data,
+                        name: userName,           // NEW: Send Name to Sheet
+                        email: userEmail,         // NEW: Send Email to Sheet
+                        score: percentage,        // NEW: Send Score to Sheet
+                        timeTaken: exactTimeStr   // NEW: Send Time to Sheet
                     };
 
                     fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) })
@@ -447,18 +463,17 @@
             setTimeout(() => drawBrandedScorecard(percentage), 100);
         }
 
+        // --- HEAVY & PREMIUM CERTIFICATE GENERATOR WITH GLOW FX ---
         function drawBrandedScorecard(percentage) {
             const canvas = document.getElementById('scorecard-canvas');
             const ctx = canvas.getContext('2d');
 
-            // Premium Dark Background
             let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             grad.addColorStop(0, '#040B16');
             grad.addColorStop(1, '#0B1B42');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Elegant Border
             ctx.strokeStyle = '#00D4FF';
             ctx.lineWidth = 4;
             ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
@@ -517,6 +532,7 @@
             };
 
             const logo = new Image();
+            logo.crossOrigin = "anonymous";
             
             logo.onload = () => {
                 const logoWidth = 200; 
