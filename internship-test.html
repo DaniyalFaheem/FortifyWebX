@@ -62,8 +62,7 @@
             <div class="text-xl font-mono text-red-400 bg-red-900/30 px-4 py-1 rounded" id="timer">15:00</div>
         </div>
         
-        <div id="mcq-container" class="space-y-6 text-gray-200">
-            </div>
+        <div id="mcq-container" class="space-y-6 text-gray-200"></div>
 
         <button onclick="finishTestAndUpload()" class="mt-8 bg-green-600 hover:bg-green-500 font-bold py-3 px-8 rounded-lg transition w-full shadow-[0_0_15px_rgba(22,163,74,0.4)]">
             Submit Assessment
@@ -76,7 +75,7 @@
         <p class="text-gray-400 text-sm">Please DO NOT close this tab. Your video and answers are being transmitted securely to FortifyWebX servers.</p>
     </div>
 
-    <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-3xl w-full text-center shadow-2xl">
+    <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
         <h2 class="text-3xl font-extrabold mb-2">Assessment Results</h2>
         <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">⚠️ You have already taken this test! Your saved result is displayed below.</p>
         
@@ -84,19 +83,22 @@
             <div id="result-bar" class="bg-gradient-to-r from-[#00D4FF] to-[#1A56DB] h-full transition-all duration-1000" style="width: 0%"></div>
             <span id="result-percent-text" class="absolute inset-0 flex items-center justify-center font-bold text-sm text-white">0%</span>
         </div>
-        <div class="text-6xl font-black gradient-text mb-6 text-center" id="final-score">0%</div>
         
         <div class="text-left bg-black/40 p-4 rounded-lg mb-8 max-h-48 overflow-y-auto" id="review-container">
             <h3 class="font-bold text-[#00D4FF] mb-2 border-b border-gray-600 pb-2">Review Your Answers:</h3>
         </div>
 
-        <canvas id="scorecard-canvas" width="1000" height="700" class="hidden"></canvas>
+        <div class="mt-8 mb-8">
+            <h3 class="font-bold text-white text-xl mb-4"><i class="fa-solid fa-certificate text-[#00D4FF] mr-2"></i> Your Official Certificate</h3>
+            <p class="text-gray-400 text-sm mb-4">You can use the button below to download, or right-click/long-press the image to save it directly.</p>
+            <canvas id="scorecard-canvas" width="1000" height="700" class="max-w-full h-auto mx-auto rounded-xl shadow-[0_0_25px_rgba(0,212,255,0.2)] border border-[#00D4FF]/50"></canvas>
+        </div>
 
         <div class="bg-[#1A56DB]/20 border border-[#1A56DB] p-6 rounded-xl mb-8 text-left flex flex-col md:flex-row items-center gap-6">
             <div class="flex-grow">
-                <h3 class="font-bold text-white text-lg mb-2"><i class="fa-solid fa-certificate text-[#00D4FF] mr-2"></i> Official Certificate & Next Steps</h3>
-                <p class="text-gray-300 text-sm mb-4">Your details have been securely logged. To confirm your entry, download your <strong>Official Eligibility Certificate</strong> and share it on LinkedIn.</p>
-                <p class="text-red-400 font-bold text-xs mb-4 uppercase tracking-widest"><i class="fa-solid fa-bell"></i> Mandatory: Follow all our social media platforms for further updates and next phase announcements.</p>
+                <h3 class="font-bold text-white text-lg mb-2"><i class="fa-solid fa-share-nodes text-[#00D4FF] mr-2"></i> Next Steps & LinkedIn Verification</h3>
+                <p class="text-gray-300 text-sm mb-4">Your details have been securely logged. To confirm your entry, download your certificate and share it on LinkedIn.</p>
+                <p class="text-red-400 font-bold text-xs mb-4 uppercase tracking-widest"><i class="fa-solid fa-bell"></i> Mandatory: Follow all our social media platforms for further updates.</p>
                 
                 <button onclick="downloadScorecard()" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded mb-4 transition flex items-center justify-center gap-2 w-full md:w-auto shadow-[0_0_15px_rgba(22,163,74,0.4)]">
                     <i class="fa-solid fa-download"></i> Download Premium Certificate
@@ -171,7 +173,6 @@
                 userEmail = emailInput;
                 userName = nameInput;
                 
-                // Store Name in LocalStorage as well
                 if (localStorage.getItem(`fwx_done_${userEmail}`)) {
                     userName = localStorage.getItem(`fwx_name_${userEmail}`) || userName;
                     showSavedResults();
@@ -254,35 +255,47 @@
             mediaRecorder.start();
         }
 
+        // --- NEW ENHANCED ANTI-CHEAT SYSTEM ---
         function checkCameraTape() {
             if (!isTestActive) return;
             const video = document.getElementById('mini-video-preview');
             if (!video || video.paused || video.ended) return;
 
             const canvas = document.createElement('canvas');
-            canvas.width = 32; canvas.height = 24;
+            // Higher resolution for better detail analysis
+            canvas.width = 64; 
+            canvas.height = 48;
             const ctx = canvas.getContext('2d');
             try {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imgData.data;
                 
-                let total = 0;
-                for (let i = 0; i < imgData.data.length; i += 4) {
-                    total += (imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114);
+                let totalBrightness = 0;
+                const grayValues = [];
+
+                for (let i = 0; i < data.length; i += 4) {
+                    // Standard luminance formula
+                    const gray = (data[i] * 0.299) + (data[i+1] * 0.587) + (data[i+2] * 0.114);
+                    grayValues.push(gray);
+                    totalBrightness += gray;
                 }
-                let avgBrightness = total / (canvas.width * canvas.height);
-                
-                let variance = 0;
-                for (let i = 0; i < imgData.data.length; i += 4) {
-                    let p = (imgData.data[i] * 0.299 + imgData.data[i+1] * 0.587 + imgData.data[i+2] * 0.114);
-                    variance += Math.pow(p - avgBrightness, 2);
+
+                let avgBrightness = totalBrightness / grayValues.length;
+
+                // Calculate Standard Deviation (Detail level)
+                let sumOfSquaredDiffs = 0;
+                for (let i = 0; i < grayValues.length; i++) {
+                    sumOfSquaredDiffs += Math.pow(grayValues[i] - avgBrightness, 2);
                 }
-                variance = variance / (canvas.width * canvas.height);
+                let variance = sumOfSquaredDiffs / grayValues.length;
+                let stdDev = Math.sqrt(variance);
 
                 const screen = document.getElementById('security-violation-screen');
                 
-                if (avgBrightness < 10 || variance < 40) { 
-                    triggerViolation("CAMERA BLOCKED", "Your camera is covered or dark. Please unblock the lens to continue.", false);
+                // Detection: Very dark (< 25) OR Very Flat/Covered with tape/hand (stdDev < 15)
+                if (avgBrightness < 25 || stdDev < 15) { 
+                    triggerViolation("CAMERA BLOCKED", "Your camera lens is covered, taped, or in complete darkness. Please unblock it to continue.", false);
                 } else if (screen.getAttribute('data-type') === 'camera') {
                     screen.classList.add('hidden');
                     screen.removeAttribute('data-type');
@@ -423,7 +436,6 @@
         function renderUIResults(score, total, reviewHTML) {
             const percentage = Math.round((score / total) * 100);
             
-            document.getElementById('final-score').innerText = `${percentage}%`;
             document.getElementById('share-score').innerText = `${percentage}%`;
             document.getElementById('review-container').innerHTML += reviewHTML;
 
@@ -435,19 +447,18 @@
             setTimeout(() => drawBrandedScorecard(percentage), 100);
         }
 
-        // --- HEAVY & PREMIUM CERTIFICATE GENERATOR WITH .PNG FIX ---
         function drawBrandedScorecard(percentage) {
             const canvas = document.getElementById('scorecard-canvas');
             const ctx = canvas.getContext('2d');
 
-            // 1. Premium Dark Background
+            // Premium Dark Background
             let grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             grad.addColorStop(0, '#040B16');
             grad.addColorStop(1, '#0B1B42');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 2. Elegant Border
+            // Elegant Border
             ctx.strokeStyle = '#00D4FF';
             ctx.lineWidth = 4;
             ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
@@ -456,13 +467,11 @@
             ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
 
             const drawContent = () => {
-                // Header
                 ctx.textAlign = "center";
                 ctx.fillStyle = '#FFFFFF';
                 ctx.font = '900 42px sans-serif';
                 ctx.fillText('CERTIFICATE OF ELIGIBILITY', canvas.width / 2, 280);
 
-                // Body
                 ctx.fillStyle = '#94A3B8';
                 ctx.font = 'italic 22px serif';
                 ctx.fillText('This is to formally certify that', canvas.width / 2, 330);
@@ -475,12 +484,10 @@
                 ctx.font = '20px sans-serif';
                 ctx.fillText('has successfully cleared the FortifyWebX Internship Entry Test with an official score of:', canvas.width / 2, 440);
 
-                // Giant Score 
                 ctx.fillStyle = '#00D4FF';
                 ctx.font = '900 80px sans-serif';
                 ctx.fillText(`${percentage}%`, canvas.width / 2, 540);
 
-                // Eligibility Status
                 if(percentage >= 50) {
                     ctx.fillStyle = '#22C55E';
                     ctx.font = 'bold 24px sans-serif';
@@ -491,12 +498,10 @@
                     ctx.fillText('STATUS: NOT ELIGIBLE AT THIS TIME', canvas.width / 2, 590);
                 }
 
-                // Social Media Footer Note
                 ctx.fillStyle = '#64748B';
                 ctx.font = '14px sans-serif';
                 ctx.fillText('For further updates and next steps, follow FortifyWebX on all official social media platforms.', canvas.width / 2, 660);
 
-                // Date & Signature
                 const date = new Date().toLocaleDateString();
                 ctx.textAlign = "left";
                 ctx.fillStyle = '#FFFFFF';
@@ -516,7 +521,23 @@
             logo.onload = () => {
                 const logoWidth = 200; 
                 const logoHeight = (logo.height / logo.width) * logoWidth;
+                const centerX = canvas.width / 2;
+                const centerY = 70 + (logoHeight / 2);
+
+                let glowOrb = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, 140);
+                glowOrb.addColorStop(0, 'rgba(0, 212, 255, 0.4)'); 
+                glowOrb.addColorStop(1, 'rgba(0, 212, 255, 0)');   
+                ctx.fillStyle = glowOrb;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 140, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowColor = 'rgba(0, 212, 255, 0.8)';
+                ctx.shadowBlur = 20;
+
                 ctx.drawImage(logo, (canvas.width - logoWidth) / 2, 70, logoWidth, logoHeight); 
+                
+                ctx.shadowBlur = 0; 
                 drawContent();
             };
             
@@ -528,7 +549,6 @@
                 drawContent();
             };
             
-            // Reverted back to logo.png
             logo.src = 'logo.png'; 
         }
 
@@ -542,7 +562,7 @@
                 link.href = image;
                 link.click();
             } catch (err) {
-                alert("Security policy prevented download. Right-click the certificate area to save.");
+                alert("Security policy prevented direct download. Please right-click or long-press the certificate image below to save it.");
             }
         }
 
