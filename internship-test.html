@@ -7,6 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- AI Face Tracker Library -->
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0B132B; color: white; overflow-x: hidden; }
         .gradient-text { background: linear-gradient(90deg, #00D4FF, #1A56DB); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -35,8 +39,8 @@
         <input type="text" id="user-name" placeholder="Full Name" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
         <input type="email" id="user-email" placeholder="Registered Email Address" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
         
-        <button onclick="verifyCandidate()" class="w-full bg-[#1A56DB] hover:bg-[#00D4FF] hover:text-[#0B132B] font-bold py-3 px-6 rounded-lg transition duration-300">
-            Verify & Proceed
+        <button onclick="verifyCandidate()" id="verify-btn" class="w-full bg-[#1A56DB] hover:bg-[#00D4FF] hover:text-[#0B132B] font-bold py-3 px-6 rounded-lg transition duration-300">
+            Loading AI Models... Please Wait
         </button>
         <p id="email-error" class="text-red-500 text-sm mt-3 hidden">Access Denied. Email not registered in the system.</p>
         <p id="name-error" class="text-red-500 text-sm mt-3 hidden">Please enter your full name.</p>
@@ -47,7 +51,7 @@
         <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <strong class="text-red-400">The assessment will run in Full-Screen mode.</strong></p>
         
         <div class="relative w-full h-56 bg-black rounded-lg overflow-hidden mb-6 border-2 border-dashed border-gray-600" id="video-container">
-            <video id="video-preview" class="w-full h-full object-cover" autoplay muted></video>
+            <video id="video-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
             <div id="scan-line" class="absolute top-0 w-full h-1 bg-[#00D4FF] shadow-[0_0_15px_#00D4FF] hidden opacity-70"></div>
         </div>
 
@@ -123,8 +127,8 @@
         </div>
     </div>
 
-    <div id="mini-video-container" class="hidden fixed bottom-4 right-4 w-40 h-32 bg-black border-2 border-red-500 rounded-lg overflow-hidden shadow-2xl z-50">
-        <video id="mini-video-preview" class="w-full h-full object-cover" autoplay muted></video>
+    <div id="mini-video-container" class="hidden fixed bottom-4 right-4 w-40 h-32 bg-black border-2 border-green-500 rounded-lg overflow-hidden shadow-2xl z-50">
+        <video id="mini-video-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
     </div>
 
     <script>
@@ -138,9 +142,10 @@
             "juttgill21336@gmail.com","mamoongondal09@gmail.com","maqil3293@gmail.com","farooqtariq211@gmail.com",
             "ochelights@gmail.com","abhisheksingh740906@gmail.com","kambalavihitha@gmail.com","bhattiabdurehman987@gmail.com",
             "aa.ayeshaarif@gmail.com","samtextechnology.info@gmail.com","muhamad.huzaiffa@gmail.com","abdullahjutt4102004@gmail.com",
-            "kamalchalumuri@gmail.com","daniyalfaheem1@gmail.com"
+            "kamalchalumuri@gmail.com","daniyalfaheem2@gmail.com"
         ];
         
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdsXrqliNS717VOBA7xgv8hLYdRyQwRMvkPp9-vWFUKqxNs6oT708dFNL-ZAPZX6e05g/exec"; 
 
         const questions = [
@@ -156,9 +161,28 @@
         let userName = "";
         let proctorInterval;
         let isTestActive = false;
-        let testStartTime = 0; // NEW: Timer Track logic
+        let testStartTime = 0; 
+        let aiModelsLoaded = false;
+
+        // INITIALIZE AI MODELS
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
+        ]).then(() => {
+            aiModelsLoaded = true;
+            document.getElementById('verify-btn').innerText = "Verify & Proceed";
+        }).catch(err => {
+            console.error(err);
+            document.getElementById('verify-btn').innerText = "AI Init Failed - Proceed Anyway";
+            aiModelsLoaded = true; 
+        });
 
         function verifyCandidate() {
+            if (!aiModelsLoaded) {
+                alert("Please wait for the AI Security Models to initialize.");
+                return;
+            }
+
             const nameInput = document.getElementById('user-name').value.trim();
             const emailInput = document.getElementById('user-email').value.trim().toLowerCase();
             
@@ -237,18 +261,21 @@
         function startAssessment() {
             enterFullScreen(); 
             isTestActive = true;
-            testStartTime = Date.now(); // Start exact timing
+            testStartTime = Date.now(); 
 
             document.getElementById('screen-setup').classList.add('hidden');
             document.getElementById('screen-test').classList.remove('hidden');
-            document.getElementById('mini-video-preview').srcObject = stream;
+            
+            const miniVideo = document.getElementById('mini-video-preview');
+            miniVideo.srcObject = stream;
             document.getElementById('mini-video-container').classList.remove('hidden');
 
             renderQuestions();
             startRecording();
             startTimer(15 * 60);
 
-            proctorInterval = setInterval(checkCameraTape, 1000);
+            // Start Heavy AI Proctoring check every 1.5 seconds
+            proctorInterval = setInterval(runAIProctoring, 1500);
         }
 
         function startRecording() {
@@ -257,47 +284,52 @@
             mediaRecorder.start();
         }
 
-        function checkCameraTape() {
+        // NEW 100% SECURE AI PROCTORING LOGIC
+        async function runAIProctoring() {
             if (!isTestActive) return;
             const video = document.getElementById('mini-video-preview');
             if (!video || video.paused || video.ended) return;
 
-            const canvas = document.createElement('canvas');
-            canvas.width = 64; 
-            canvas.height = 48;
-            const ctx = canvas.getContext('2d');
             try {
+                // 1. Basic Darkness / Hardware cover check
+                const canvas = document.createElement('canvas');
+                canvas.width = 64; canvas.height = 48;
+                const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imgData.data;
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
                 
                 let totalBrightness = 0;
-                const grayValues = [];
-
-                for (let i = 0; i < data.length; i += 4) {
-                    const gray = (data[i] * 0.299) + (data[i+1] * 0.587) + (data[i+2] * 0.114);
-                    grayValues.push(gray);
-                    totalBrightness += gray;
+                for (let i = 0; i < imgData.length; i += 4) {
+                    totalBrightness += (imgData[i] * 0.299) + (imgData[i+1] * 0.587) + (imgData[i+2] * 0.114);
                 }
-
-                let avgBrightness = totalBrightness / grayValues.length;
-
-                let sumOfSquaredDiffs = 0;
-                for (let i = 0; i < grayValues.length; i++) {
-                    sumOfSquaredDiffs += Math.pow(grayValues[i] - avgBrightness, 2);
-                }
-                let variance = sumOfSquaredDiffs / grayValues.length;
-                let stdDev = Math.sqrt(variance);
+                let avgBrightness = totalBrightness / (canvas.width * canvas.height);
 
                 const screen = document.getElementById('security-violation-screen');
-                
-                if (avgBrightness < 25 || stdDev < 15) { 
-                    triggerViolation("CAMERA BLOCKED", "Your camera lens is covered, taped, or in complete darkness. Please unblock it to continue.", false);
-                } else if (screen.getAttribute('data-type') === 'camera') {
-                    screen.classList.add('hidden');
-                    screen.removeAttribute('data-type');
+
+                if (avgBrightness < 25) { 
+                    triggerViolation("CAMERA BLOCKED / LOW LIGHT", "Your camera lens is covered or the environment is too dark. Unblock it and turn on the lights to continue.", false);
+                    return; 
                 }
-            } catch (e) { console.log(e); }
+
+                // 2. Advanced Face API Check
+                if (aiModelsLoaded) {
+                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 })).withFaceLandmarks();
+
+                    if (detections.length === 0) {
+                        triggerViolation("FACE NOT DETECTED", "Please look directly at the camera. Ensure your face is fully visible without masks.", false);
+                    } else if (detections.length > 1) {
+                        triggerViolation("MULTIPLE PERSONS DETECTED", "Only one candidate is allowed in the frame. This violation is being recorded.", false);
+                    } else {
+                        // Clear camera violation if everything is normal
+                        if (screen.getAttribute('data-type') === 'camera' && !screen.classList.contains('hidden')) {
+                            screen.classList.add('hidden');
+                            screen.removeAttribute('data-type');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Proctoring error: ", e);
+            }
         }
 
         document.addEventListener('fullscreenchange', () => {
@@ -322,7 +354,7 @@
                 document.getElementById('resume-fullscreen-btn').classList.remove('hidden');
                 screen.setAttribute('data-type', 'tab');
             } else {
-                document.getElementById('violation-icon').className = "fa-solid fa-camera-slash text-6xl text-red-500 mb-4 animate-bounce";
+                document.getElementById('violation-icon').className = "fa-solid fa-user-shield text-6xl text-red-500 mb-4 animate-bounce";
                 document.getElementById('resume-fullscreen-btn').classList.add('hidden');
                 screen.setAttribute('data-type', 'camera');
             }
@@ -358,7 +390,7 @@
             let timeTakenSecs = Math.floor((timeTakenMs % 60000) / 1000);
             let exactTimeStr = `${timeTakenMins}m ${timeTakenSecs}s`;
 
-            // Calculate Score before sending
+            // Calculate Score
             let userScore = 0;
             questions.forEach(q => {
                 const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
@@ -392,10 +424,10 @@
                         filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
                         mimeType: 'video/webm',
                         base64: base64data,
-                        name: userName,           // NEW: Send Name to Sheet
-                        email: userEmail,         // NEW: Send Email to Sheet
-                        score: percentage,        // NEW: Send Score to Sheet
-                        timeTaken: exactTimeStr   // NEW: Send Time to Sheet
+                        name: userName,           
+                        email: userEmail,         
+                        score: percentage,        
+                        timeTaken: exactTimeStr   
                     };
 
                     fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) })
