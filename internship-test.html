@@ -8,8 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- AI Face Tracker Library -->
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" crossorigin="anonymous"></script>
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #0B132B; color: white; overflow-x: hidden; }
@@ -18,13 +17,14 @@
         .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .loader { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #00D4FF; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .blur-test { filter: blur(10px); pointer-events: none; user-select: none; transition: filter 0.3s ease; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 relative">
 
     <div id="security-violation-screen" class="fixed inset-0 bg-black/95 z-[9999] flex flex-col items-center justify-center hidden p-4 text-center backdrop-blur-md">
-        <i id="violation-icon" class="fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4 animate-bounce"></i>
-        <h2 id="violation-title" class="text-3xl font-bold text-white mb-2">SECURITY VIOLATION DETECTED</h2>
+        <i id="violation-icon" class="fa-solid fa-user-shield text-6xl text-red-500 mb-4 animate-bounce"></i>
+        <h2 id="violation-title" class="text-3xl font-bold text-white mb-2">PROCTORING ALERT</h2>
         <p id="violation-desc" class="text-gray-400 max-w-md mb-6">The assessment will remain paused until the issue is resolved.</p>
         <button id="resume-fullscreen-btn" onclick="resumeTest()" class="hidden bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-[0_0_15px_rgba(220,38,38,0.5)] transition">
             Click to Re-Enter Full Screen & Resume Test
@@ -40,7 +40,7 @@
         <input type="email" id="user-email" placeholder="Registered Email Address" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
         
         <button onclick="verifyCandidate()" id="verify-btn" class="w-full bg-[#1A56DB] hover:bg-[#00D4FF] hover:text-[#0B132B] font-bold py-3 px-6 rounded-lg transition duration-300">
-            Loading AI Models... Please Wait
+            Verify & Proceed
         </button>
         <p id="email-error" class="text-red-500 text-sm mt-3 hidden">Access Denied. Email not registered in the system.</p>
         <p id="name-error" class="text-red-500 text-sm mt-3 hidden">Please enter your full name.</p>
@@ -66,11 +66,13 @@
             <div class="text-xl font-mono text-red-400 bg-red-900/30 px-4 py-1 rounded" id="timer">15:00</div>
         </div>
         
-        <div id="mcq-container" class="space-y-6 text-gray-200"></div>
+        <div id="test-content-area" class="transition-all duration-300">
+            <div id="mcq-container" class="space-y-6 text-gray-200"></div>
 
-        <button onclick="finishTestAndUpload()" class="mt-8 bg-green-600 hover:bg-green-500 font-bold py-3 px-8 rounded-lg transition w-full shadow-[0_0_15px_rgba(22,163,74,0.4)]">
-            Submit Assessment
-        </button>
+            <button onclick="finishTestAndUpload()" class="mt-8 bg-green-600 hover:bg-green-500 font-bold py-3 px-8 rounded-lg transition w-full shadow-[0_0_15px_rgba(22,163,74,0.4)]">
+                Submit Assessment
+            </button>
+        </div>
     </div>
 
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
@@ -116,15 +118,6 @@
                 <a href="https://www.linkedin.com/feed/" target="_blank" class="bg-[#0077b5] hover:bg-[#005582] text-white font-bold py-2 px-4 rounded transition block text-center text-sm">Open LinkedIn &rarr;</a>
             </div>
         </div>
-        
-        <div class="border-t border-gray-700 pt-6">
-            <p class="font-bold text-white mb-4 text-center">Follow for Official Updates:</p>
-            <div class="flex justify-center gap-6 text-2xl">
-                <a href="https://www.linkedin.com/company/fortifywebx/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.facebook.com/people/FortifyWebx/61589326433616/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="https://www.instagram.com/fortifywebx/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-instagram"></i></a>
-            </div>
-        </div>
     </div>
 
     <div id="mini-video-container" class="hidden fixed bottom-4 right-4 w-40 h-32 bg-black border-2 border-green-500 rounded-lg overflow-hidden shadow-2xl z-50">
@@ -145,7 +138,6 @@
             "kamalchalumuri@gmail.com","daniyalfaheem2@gmail.com"
         ];
         
-        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdsXrqliNS717VOBA7xgv8hLYdRyQwRMvkPp9-vWFUKqxNs6oT708dFNL-ZAPZX6e05g/exec"; 
 
         const questions = [
@@ -159,30 +151,34 @@
         let stream;
         let userEmail = "";
         let userName = "";
-        let proctorInterval;
         let isTestActive = false;
         let testStartTime = 0; 
-        let aiModelsLoaded = false;
+        
+        // Google MediaPipe Face Detection Initialization
+        let faceDetection;
+        let aiInitialized = false;
 
-        // INITIALIZE AI MODELS
-        Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
-        ]).then(() => {
-            aiModelsLoaded = true;
-            document.getElementById('verify-btn').innerText = "Verify & Proceed";
-        }).catch(err => {
-            console.error(err);
-            document.getElementById('verify-btn').innerText = "AI Init Failed - Proceed Anyway";
-            aiModelsLoaded = true; 
-        });
+        function initializeAI() {
+            try {
+                faceDetection = new FaceDetection({locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
+                }});
+                faceDetection.setOptions({
+                    model: 'short', // Fast detection within 2 meters
+                    minDetectionConfidence: 0.5
+                });
+                faceDetection.onResults(onFaceResults);
+                aiInitialized = true;
+                console.log("MediaPipe AI Initialized");
+            } catch (e) {
+                console.error("AI Init Failed: ", e);
+            }
+        }
+        
+        // Initialize AI quietly in background as soon as page loads
+        window.addEventListener('DOMContentLoaded', initializeAI);
 
         function verifyCandidate() {
-            if (!aiModelsLoaded) {
-                alert("Please wait for the AI Security Models to initialize.");
-                return;
-            }
-
             const nameInput = document.getElementById('user-name').value.trim();
             const emailInput = document.getElementById('user-email').value.trim().toLowerCase();
             
@@ -274,8 +270,8 @@
             startRecording();
             startTimer(15 * 60);
 
-            // Start Heavy AI Proctoring check every 1.5 seconds
-            proctorInterval = setInterval(runAIProctoring, 1500);
+            // Start AI Proctoring Loop
+            runProctoringLoop();
         }
 
         function startRecording() {
@@ -284,14 +280,13 @@
             mediaRecorder.start();
         }
 
-        // NEW 100% SECURE AI PROCTORING LOGIC
-        async function runAIProctoring() {
+        // The Continuous AI Checking Loop
+        async function runProctoringLoop() {
             if (!isTestActive) return;
             const video = document.getElementById('mini-video-preview');
-            if (!video || video.paused || video.ended) return;
 
-            try {
-                // 1. Basic Darkness / Hardware cover check
+            if (video.readyState === 4) {
+                // 1. Basic Hardware / Darkness Check
                 const canvas = document.createElement('canvas');
                 canvas.width = 64; canvas.height = 48;
                 const ctx = canvas.getContext('2d');
@@ -304,31 +299,34 @@
                 }
                 let avgBrightness = totalBrightness / (canvas.width * canvas.height);
 
-                const screen = document.getElementById('security-violation-screen');
-
                 if (avgBrightness < 25) { 
                     triggerViolation("CAMERA BLOCKED / LOW LIGHT", "Your camera lens is covered or the environment is too dark. Unblock it and turn on the lights to continue.", false);
-                    return; 
+                } else if (aiInitialized) {
+                    // 2. Google MediaPipe AI Face Check
+                    await faceDetection.send({image: video});
                 }
+            }
+            
+            setTimeout(runProctoringLoop, 1000); // Check every 1 second
+        }
 
-                // 2. Advanced Face API Check
-                if (aiModelsLoaded) {
-                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ scoreThreshold: 0.4 })).withFaceLandmarks();
+        // Callback function when Google AI processes a frame
+        function onFaceResults(results) {
+            if (!isTestActive) return;
+            
+            const screen = document.getElementById('security-violation-screen');
 
-                    if (detections.length === 0) {
-                        triggerViolation("FACE NOT DETECTED", "Please look directly at the camera. Ensure your face is fully visible without masks.", false);
-                    } else if (detections.length > 1) {
-                        triggerViolation("MULTIPLE PERSONS DETECTED", "Only one candidate is allowed in the frame. This violation is being recorded.", false);
-                    } else {
-                        // Clear camera violation if everything is normal
-                        if (screen.getAttribute('data-type') === 'camera' && !screen.classList.contains('hidden')) {
-                            screen.classList.add('hidden');
-                            screen.removeAttribute('data-type');
-                        }
-                    }
+            if (!results.detections || results.detections.length === 0) {
+                triggerViolation("FACE NOT DETECTED", "Please look directly at the camera. Ensure your face is fully visible without masks.", false);
+            } else if (results.detections.length > 1) {
+                triggerViolation("MULTIPLE PERSONS DETECTED", "Only one candidate is allowed in the frame. This violation is being recorded.", false);
+            } else {
+                // If everything is clear, remove the camera overlay
+                if (screen.getAttribute('data-type') === 'camera' && !screen.classList.contains('hidden')) {
+                    screen.classList.add('hidden');
+                    screen.removeAttribute('data-type');
+                    document.getElementById('test-content-area').classList.remove('blur-test');
                 }
-            } catch (e) {
-                console.error("Proctoring error: ", e);
             }
         }
 
@@ -349,6 +347,9 @@
             document.getElementById('violation-title').innerText = title;
             document.getElementById('violation-desc').innerText = desc;
             
+            // Blur the test area so they can't read questions
+            document.getElementById('test-content-area').classList.add('blur-test');
+
             if (requiresClick) {
                 document.getElementById('violation-icon').className = "fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4 animate-bounce";
                 document.getElementById('resume-fullscreen-btn').classList.remove('hidden');
@@ -365,6 +366,7 @@
             enterFullScreen();
             document.getElementById('security-violation-screen').classList.add('hidden');
             document.getElementById('security-violation-screen').removeAttribute('data-type');
+            document.getElementById('test-content-area').classList.remove('blur-test');
         }
 
         function renderQuestions() {
@@ -382,15 +384,12 @@
 
         function finishTestAndUpload() {
             isTestActive = false; 
-            clearInterval(proctorInterval);
             
-            // Calculate Time Taken
             let timeTakenMs = Date.now() - testStartTime;
             let timeTakenMins = Math.floor(timeTakenMs / 60000);
             let timeTakenSecs = Math.floor((timeTakenMs % 60000) / 1000);
             let exactTimeStr = `${timeTakenMins}m ${timeTakenSecs}s`;
 
-            // Calculate Score
             let userScore = 0;
             questions.forEach(q => {
                 const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
@@ -495,7 +494,6 @@
             setTimeout(() => drawBrandedScorecard(percentage), 100);
         }
 
-        // --- HEAVY & PREMIUM CERTIFICATE GENERATOR WITH GLOW FX ---
         function drawBrandedScorecard(percentage) {
             const canvas = document.getElementById('scorecard-canvas');
             const ctx = canvas.getContext('2d');
