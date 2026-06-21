@@ -49,7 +49,7 @@
 
     <div id="screen-setup" class="glass-panel p-8 rounded-2xl max-w-lg w-full text-center shadow-2xl hidden transition-all">
         <h2 class="text-xl font-bold mb-4 text-[#00D4FF]">Identity & Hardware Verification</h2>
-        <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <strong class="text-red-400">The assessment will run in Full-Screen mode.</strong></p>
+        <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <b class="text-red-400">The assessment will run in Full-Screen mode.</b></p>
         
         <div class="relative w-full h-56 bg-black rounded-lg overflow-hidden mb-6 border-2 border-dashed border-gray-600" id="video-container">
             <video id="video-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
@@ -70,7 +70,7 @@
         <div id="test-content-area" class="transition-all duration-300">
             <div id="mcq-container" class="space-y-6 text-gray-200"></div>
 
-            <button onclick="finishTestAndUpload()" class="mt-8 bg-green-600 hover:bg-green-500 font-bold py-3 px-8 rounded-lg transition w-full shadow-[0_0_15px_rgba(22,163,74,0.4)]">
+            <button onclick="finishTestAndUpload()" id="submit-test-btn" class="mt-8 bg-green-600 hover:bg-green-500 font-bold py-3 px-8 rounded-lg transition w-full shadow-[0_0_15px_rgba(22,163,74,0.4)]">
                 Submit Assessment
             </button>
         </div>
@@ -79,7 +79,7 @@
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
         <div class="loader"></div>
         <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Analyzing Session Data...</h2>
-        <p class="text-gray-400 text-sm">We are analyzing your session to verify that the assessment was completed correctly without any violations. Please DO NOT close this tab.</p>
+        <p class="text-gray-300 text-sm">Patience please, this may take time because we are deeply analyzing your session to verify that the assessment was completed correctly without any violations. Please DO NOT close this tab.</p>
     </div>
 
     <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
@@ -139,17 +139,15 @@
             "zahhaktariq@gmail.com", "maryamamjadedu.22@gmail.com", "h.sultan013578@gmail.com",
             "lainola@yahoo.com", "anynomus350@gmail.com", "zaragotamail@gmail.com",
             "mr.radeelahmad@icloud.com", "zenexus.pentest@gmail.com", "sarmadhayat2019@gmail.com",
-            "daniyalfaheem6@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
+            "daniyalfaheem7@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
             "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
             "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
             "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
             "kamalchalumuri@gmail.com", "alitalibhussain12@gmail.com"
         ];
         
-        // Version 7 URL
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTqA60WtN0Yh3tsW4ml0DGLpCnIl7LeKucPtbSykSbP8ZIdsKqTrthUtVIuTchQKccg/exec"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvVI8VE_w1xEghzVZLByIXOuAbFJHtUCukMbvXSel-ynujee_CLu-ympTadUoOk6Zg4A/exec";
 
-        // 30 FULL MCQs WITH PROPER DISTRACTORS
         const questions = [
             { id: 1, q: "Which layer of the OSI model handles IP addressing and routing?", options: ["Layer 2 – Data Link", "Layer 3 – Network", "Layer 4 – Transport", "Layer 7 – Application"], answer: 1 },
             { id: 2, q: "What does a firewall primarily do?", options: ["Enhances internet speed", "Monitors and controls network traffic based on security rules", "Detects physical hardware faults", "Encrypts all outgoing data"], answer: 1 },
@@ -185,7 +183,6 @@
 
         let mediaRecorder, stream, userEmail = "", userName = "", userWhatsapp = "";
         let isTestActive = false, isSetupActive = false, testStartTime = 0, recordedChunks = [];
-        
         let faceDetection, aiInitialized = false, violationStrikes = 0, setupValidFrames = 0;
 
         function initializeAI() {
@@ -193,19 +190,13 @@
                 faceDetection = new FaceDetection({locateFile: (file) => {
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
                 }});
-                
-                faceDetection.setOptions({
-                    model: 'short', 
-                    minDetectionConfidence: 0.90 
-                });
-                
+                faceDetection.setOptions({ model: 'short', minDetectionConfidence: 0.90 });
                 faceDetection.onResults(onFaceResults);
                 aiInitialized = true;
             } catch (e) {
-                console.error("AI Init Failed: ", e);
+                console.log("AI Error", e);
             }
         }
-        
         window.addEventListener('DOMContentLoaded', initializeAI);
 
         function verifyCandidate() {
@@ -409,8 +400,6 @@
 
             renderQuestions();
             startRecording();
-            
-            // TIMER SET TO 15 MINUTES (15 * 60 SECONDS = 900 SECONDS)
             startTimer(15 * 60);
 
             runLiveProctoringLoop();
@@ -499,7 +488,14 @@
         }
 
         function finishTestAndUpload() {
+            if(!isTestActive) return;
             isTestActive = false; 
+            
+            const submitBtn = document.getElementById('submit-test-btn');
+            if(submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = "Processing...";
+            }
             
             let timeTakenMs = Date.now() - testStartTime;
             let timeTakenMins = Math.floor(timeTakenMs / 60000);
@@ -523,9 +519,25 @@
             document.getElementById('screen-test').classList.add('hidden');
             document.getElementById('mini-video-container').classList.add('hidden');
             document.getElementById('security-violation-screen').classList.add('hidden');
+            
             document.getElementById('screen-uploading').classList.remove('hidden');
 
-            setTimeout(() => {
+            const dataPayload = {
+                type: "data",
+                name: userName,           
+                email: userEmail,
+                whatsapp: userWhatsapp, 
+                score: percentage,        
+                timeTaken: exactTimeStr   
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, { 
+                method: "POST", 
+                body: JSON.stringify(dataPayload) 
+            })
+            .then(res => res.json())
+            .then(dataResponse => {
+                
                 const blob = new Blob(recordedChunks, { type: 'video/webm' });
                 const reader = new FileReader();
                 reader.readAsDataURL(blob);
@@ -535,38 +547,32 @@
                     const safeEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
                     const safeName = userName.replace(/[^a-zA-Z0-9]/g, '_');
                     
-                    const payload = {
+                    const videoPayload = {
+                        type: "video",
                         filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
                         mimeType: 'video/webm',
                         base64: base64data,
-                        name: userName,           
-                        email: userEmail,
-                        whatsapp: userWhatsapp, 
-                        score: percentage,        
-                        timeTaken: exactTimeStr   
+                        email: userEmail
                     };
 
                     fetch(GOOGLE_SCRIPT_URL, { 
                         method: "POST", 
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify(payload) 
+                        body: JSON.stringify(videoPayload) 
                     })
                     .then(res => res.json())
-                    .then(data => {
-                        if(data.status === "success") {
-                            calculateAndShowResults(true);
-                        } else {
-                            alert("Database Error: " + data.message);
-                            calculateAndShowResults(true);
-                        }
+                    .then(videoResponse => {
+                        calculateAndShowResults(true);
                     })
-                    .catch(err => { 
-                        console.error(err); 
-                        alert("Sync Error. Showing local results.");
-                        calculateAndShowResults(true); 
+                    .catch(e => {
+                        console.log("Video Sync Error", e);
+                        calculateAndShowResults(true);
                     });
                 };
-            }, 1000); 
+            })
+            .catch(err => { 
+                console.error(err); 
+                calculateAndShowResults(true); 
+            });
         }
 
         function calculateAndShowResults(isNewRequest) {
@@ -586,7 +592,7 @@
                     reviewHTML += `<p class="text-green-400 text-sm mb-2"><i class="fa-solid fa-check mr-2"></i> Q${q.id}: Correct</p>`;
                 } else {
                     reviewHTML += `<p class="text-red-400 text-sm mb-1"><i class="fa-solid fa-xmark mr-2"></i> Q${q.id}: Incorrect</p>`;
-                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <strong>${q.options[q.answer]}</strong></p>`;
+                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <b>${q.options[q.answer]}</b></p>`;
                 }
             });
 
@@ -665,7 +671,6 @@
                 ctx.font = '900 80px sans-serif';
                 ctx.fillText(`${percentage}%`, canvas.width / 2, 540);
 
-                // PASSING SCORE IS SET TO 65%
                 if(percentage >= 65) {
                     ctx.fillStyle = '#22C55E';
                     ctx.font = 'bold 24px sans-serif';
@@ -751,7 +756,6 @@
             let interval = setInterval(() => {
                 m = parseInt(timer / 60, 10); s = parseInt(timer % 60, 10);
                 display.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-                // IF TIMER HITS ZERO, CLEAR INTERVAL AND AUTO-SUBMIT THE TEST
                 if (--timer < 0) { clearInterval(interval); finishTestAndUpload(); }
             }, 1000);
         }
