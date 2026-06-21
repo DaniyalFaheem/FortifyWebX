@@ -139,19 +139,48 @@
             "zahhaktariq@gmail.com", "maryamamjadedu.22@gmail.com", "h.sultan013578@gmail.com",
             "lainola@yahoo.com", "anynomus350@gmail.com", "zaragotamail@gmail.com",
             "mr.radeelahmad@icloud.com", "zenexus.pentest@gmail.com", "sarmadhayat2019@gmail.com",
-            "daniyalfaheem5@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
+            "daniyalfaheem6@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
             "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
             "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
             "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
-            "kamalchalumuri@gmail.com"
+            "kamalchalumuri@gmail.com", "alitalibhussain12@gmail.com"
         ];
         
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaP0qv8YNd5e7Av-fX8ds3g3OdQS9pbVm9PL1zP8rz2RGRINWNI1ak6kskEqCECnY/exec"; 
+        // Version 7 URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTqA60WtN0Yh3tsW4ml0DGLpCnIl7LeKucPtbSykSbP8ZIdsKqTrthUtVIuTchQKccg/exec"; 
 
+        // 30 FULL MCQs WITH PROPER DISTRACTORS
         const questions = [
-            { id: 1, q: "Which tool is best for analyzing network traffic?", options: ["Nmap", "Wireshark", "Metasploit", "Burp Suite"], answer: 1 },
-            { id: 2, q: "What does SQLi stand for?", options: ["Secure Query Language Internet", "Structured Query Language Injection", "System Query Link Integration", "None"], answer: 1 },
-            { id: 3, q: "Which of these is a common vulnerability in web applications?", options: ["Cross-Site Scripting (XSS)", "Ethernet Spoofing", "MAC Flooding", "BIOS Flashing"], answer: 0 }
+            { id: 1, q: "Which layer of the OSI model handles IP addressing and routing?", options: ["Layer 2 – Data Link", "Layer 3 – Network", "Layer 4 – Transport", "Layer 7 – Application"], answer: 1 },
+            { id: 2, q: "What does a firewall primarily do?", options: ["Enhances internet speed", "Monitors and controls network traffic based on security rules", "Detects physical hardware faults", "Encrypts all outgoing data"], answer: 1 },
+            { id: 3, q: "What is the default port number for HTTPS?", options: ["80", "21", "443", "22"], answer: 2 },
+            { id: 4, q: "What does DNS stand for?", options: ["Digital Network System", "Domain Name System", "Dynamic Node Server", "Data Navigation Structure"], answer: 1 },
+            { id: 5, q: "A 'man-in-the-middle' (MITM) attack involves?", options: ["Guessing passwords using dictionaries", "Intercepting communication between two parties secretly", "Flooding a server with traffic", "Injecting malicious SQL queries"], answer: 1 },
+            { id: 6, q: "What type of malware encrypts your files and demands ransom?", options: ["Spyware", "Adware", "Ransomware", "Worm"], answer: 2 },
+            { id: 7, q: "A Trojan Horse in cybersecurity is?", options: ["Malware disguised as legitimate software", "A virus that replicates itself", "A hardware device used for hacking", "A secure encryption protocol"], answer: 0 },
+            { id: 8, q: "What is a 'botnet'?", options: ["A secure internal network", "A network of compromised computers controlled remotely by an attacker", "An AI used for defensive scanning", "A protocol for transferring files"], answer: 1 },
+            { id: 9, q: "What does 'phishing' mean?", options: ["Stealing physical devices", "Tricking users into revealing credentials via fake emails or websites", "Intercepting Wi-Fi signals", "Bypassing firewalls directly"], answer: 1 },
+            { id: 10, q: "Which is a likely sign of malware infection?", options: ["Faster internet speeds", "Unexpected pop-ups, crashes, and slow performance", "Increased battery life", "Automatic software updates"], answer: 1 },
+            { id: 11, q: "What does XSS stand for?", options: ["Cross-Site Scripting", "XML System Security", "Cross-Server Sync", "X-treme Secure Sockets"], answer: 0 },
+            { id: 12, q: "SQL Injection attacks exploit?", options: ["Weak Wi-Fi passwords", "Poorly sanitized web input fields to manipulate databases", "Unpatched operating systems", "Physical server vulnerabilities"], answer: 1 },
+            { id: 13, q: "What is the main purpose of HTTPS over HTTP?", options: ["Faster page load times", "Encrypting data transmitted between browser and server", "Compressing large image files", "Bypassing ISP restrictions"], answer: 1 },
+            { id: 14, q: "What is a CSRF attack?", options: ["Tricking an authenticated user's browser into making unwanted requests", "Cracking hashed passwords", "Flooding a database with dummy data", "Stealing physical server drives"], answer: 0 },
+            { id: 15, q: "Which HTTP status code means 'Unauthorized'?", options: ["200", "404", "500", "401"], answer: 3 },
+            { id: 16, q: "What is the main purpose of encryption?", options: ["To delete temporary files", "To convert data into unreadable form, protecting it from unauthorized access", "To compress data for faster transfer", "To scan for viruses"], answer: 1 },
+            { id: 17, q: "Difference between symmetric and asymmetric encryption?", options: ["Symmetric is slow; asymmetric is fast", "Symmetric uses one shared key; asymmetric uses a public/private key pair", "Symmetric is for hardware; asymmetric is for software", "There is no difference"], answer: 1 },
+            { id: 18, q: "What does a hashing function do to data?", options: ["Converts it into a fixed-length, irreversible fingerprint", "Encrypts it with a public key", "Compresses it by 50%", "Translates it into binary code"], answer: 0 },
+            { id: 19, q: "Which of these is a cryptographic hashing algorithm?", options: ["RSA", "AES", "SHA-256", "DES"], answer: 2 },
+            { id: 20, q: "What is a digital signature used for?", options: ["Encrypting whole hard drives", "Verifying the sender's identity and ensuring message integrity", "Boosting network speed", "Bypassing CAPTCHAs"], answer: 1 },
+            { id: 21, q: "In Linux, which command displays all running processes?", options: ["ls -la", "grep", "ps aux", "mkdir"], answer: 2 },
+            { id: 22, q: "What does the Linux 'chmod' command do?", options: ["Changes the user password", "Modifies file and directory permissions", "Checks disk space", "Restarts the system"], answer: 1 },
+            { id: 23, q: "What is Kali Linux primarily designed for?", options: ["Graphic design and video editing", "Penetration testing and security research", "Hosting web applications", "Gaming"], answer: 1 },
+            { id: 24, q: "What does Wireshark do?", options: ["Captures and analyzes network packets in real time", "Cracks Wi-Fi passwords", "Generates secure encryption keys", "Blocks unauthorized users automatically"], answer: 0 },
+            { id: 25, q: "What is the primary purpose of Nmap?", options: ["Removing malware", "Network scanning — discovering hosts, open ports, and services", "Writing firewall rules", "Creating phishing emails"], answer: 1 },
+            { id: 26, q: "What is 'social engineering' in cybersecurity?", options: ["Building social media platforms", "Manipulating people psychologically to reveal confidential information", "Writing code for community projects", "Optimizing search engine rankings"], answer: 1 },
+            { id: 27, q: "The CIA triad stands for?", options: ["Cyber, Intelligence, Agency", "Confidentiality, Integrity, Availability", "Control, Information, Access", "Coding, Implementation, Automation"], answer: 1 },
+            { id: 28, q: "What defines a 'zero-day vulnerability'?", options: ["A system that takes zero days to hack", "A security flaw unknown to the vendor with no available patch yet", "A virus that deletes itself instantly", "A network with zero downtime"], answer: 1 },
+            { id: 29, q: "What is two-factor authentication (2FA)?", options: ["Using two different browsers", "A second verification step beyond a password (e.g., OTP, authenticator app)", "Typing the password twice", "Using both Wi-Fi and Ethernet"], answer: 1 },
+            { id: 30, q: "A DDoS attack stands for?", options: ["Distributed Denial of Service — overwhelming a target with traffic from many sources", "Direct Data Output System", "Domain Denial of Security", "Dynamic Data Override Service"], answer: 0 }
         ];
 
         let mediaRecorder, stream, userEmail = "", userName = "", userWhatsapp = "";
@@ -380,6 +409,8 @@
 
             renderQuestions();
             startRecording();
+            
+            // TIMER SET TO 15 MINUTES (15 * 60 SECONDS = 900 SECONDS)
             startTimer(15 * 60);
 
             runLiveProctoringLoop();
@@ -634,7 +665,8 @@
                 ctx.font = '900 80px sans-serif';
                 ctx.fillText(`${percentage}%`, canvas.width / 2, 540);
 
-                if(percentage >= 50) {
+                // PASSING SCORE IS SET TO 65%
+                if(percentage >= 65) {
                     ctx.fillStyle = '#22C55E';
                     ctx.font = 'bold 24px sans-serif';
                     ctx.fillText('STATUS: OFFICIALLY ELIGIBLE FOR INTERNSHIP PROGRAM', canvas.width / 2, 590);
@@ -719,6 +751,7 @@
             let interval = setInterval(() => {
                 m = parseInt(timer / 60, 10); s = parseInt(timer % 60, 10);
                 display.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+                // IF TIMER HITS ZERO, CLEAR INTERVAL AND AUTO-SUBMIT THE TEST
                 if (--timer < 0) { clearInterval(interval); finishTestAndUpload(); }
             }, 1000);
         }
