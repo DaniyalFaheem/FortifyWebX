@@ -31,6 +31,7 @@
         </button>
     </div>
 
+    <!-- Login Screen -->
     <div id="screen-email" class="glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl transition-all">
         <img id="brand-logo" src="logo.png" alt="FortifyWebX" class="h-16 mx-auto mb-6 rounded-lg object-contain" onerror="this.src='https://via.placeholder.com/200x64?text=FortifyWebX'">
         <h2 class="text-2xl font-bold mb-2">Internship Portal</h2>
@@ -38,14 +39,16 @@
         
         <input type="text" id="user-name" placeholder="Full Name" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
         <input type="email" id="user-email" placeholder="Registered Email Address" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-4 focus:outline-none focus:border-[#00D4FF]" required>
+        <input type="text" id="user-whatsapp" placeholder="WhatsApp Number (e.g. +92300...)" class="w-full bg-black/50 border border-gray-600 rounded-lg px-4 py-3 text-white mb-6 focus:outline-none focus:border-[#00D4FF]" required>
         
         <button onclick="verifyCandidate()" id="verify-btn" class="w-full bg-[#1A56DB] hover:bg-[#00D4FF] hover:text-[#0B132B] font-bold py-3 px-6 rounded-lg transition duration-300">
             Verify & Proceed
         </button>
         <p id="email-error" class="text-red-500 text-sm mt-3 hidden">Access Denied. Email not registered in the system.</p>
-        <p id="name-error" class="text-red-500 text-sm mt-3 hidden">Please enter your full name.</p>
+        <p id="fields-error" class="text-red-500 text-sm mt-3 hidden">Please fill all fields correctly.</p>
     </div>
 
+    <!-- Setup Screen -->
     <div id="screen-setup" class="glass-panel p-8 rounded-2xl max-w-lg w-full text-center shadow-2xl hidden transition-all">
         <h2 class="text-xl font-bold mb-4 text-[#00D4FF]">Identity & Hardware Verification</h2>
         <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <strong class="text-red-400">The assessment will run in Full-Screen mode.</strong></p>
@@ -55,11 +58,12 @@
             <div id="scan-line" class="absolute top-0 w-full h-1 bg-[#00D4FF] shadow-[0_0_15px_#00D4FF] hidden opacity-70"></div>
         </div>
 
-        <button id="start-btn" onclick="startHardwareCheck()" class="w-full bg-[#1A56DB] font-bold py-3 px-6 rounded-lg transition duration-300">
+        <button id="start-btn" onclick="startHardwareCheck()" class="w-full bg-[#1A56DB] font-bold py-3 px-6 rounded-lg transition duration-300 text-sm">
             Allow Camera/Mic & Scan Face
         </button>
     </div>
 
+    <!-- Test Screen -->
     <div id="screen-test" class="hidden w-full max-w-3xl glass-panel p-8 rounded-2xl">
         <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
             <h2 class="text-2xl font-bold gradient-text">FortifyWebX Assessment</h2>
@@ -75,12 +79,14 @@
         </div>
     </div>
 
+    <!-- Uploading Screen -->
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
         <div class="loader"></div>
-        <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Syncing Secure Data...</h2>
-        <p class="text-gray-400 text-sm">Please DO NOT close this tab. Your video and answers are being transmitted securely to FortifyWebX servers.</p>
+        <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Analyzing Session Data...</h2>
+        <p class="text-gray-400 text-sm">Please DO NOT close this tab. We are analyzing your session to verify that the assessment was completed correctly without any violations.</p>
     </div>
 
+    <!-- Result Screen -->
     <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
         <h2 class="text-3xl font-extrabold mb-2">Assessment Results</h2>
         <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">⚠️ You have already taken this test! Your saved result is displayed below.</p>
@@ -118,33 +124,32 @@
                 <a href="https://www.linkedin.com/feed/" target="_blank" class="bg-[#0077b5] hover:bg-[#005582] text-white font-bold py-2 px-4 rounded transition block text-center text-sm">Open LinkedIn &rarr;</a>
             </div>
         </div>
-        
-        <div class="border-t border-gray-700 pt-6">
-            <p class="font-bold text-white mb-4 text-center">Follow for Official Updates:</p>
-            <div class="flex justify-center gap-6 text-2xl">
-                <a href="https://www.linkedin.com/company/fortifywebx/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="https://www.facebook.com/people/FortifyWebx/61589326433616/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="https://www.instagram.com/fortifywebx/" target="_blank" class="hover:text-[#00D4FF] transition"><i class="fa-brands fa-instagram"></i></a>
-            </div>
-        </div>
     </div>
 
+    <!-- Mini Proctor Video -->
     <div id="mini-video-container" class="hidden fixed bottom-4 right-4 w-40 h-32 bg-black border-2 border-green-500 rounded-lg overflow-hidden shadow-2xl z-50">
         <video id="mini-video-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
     </div>
 
     <script>
         const ALLOWED_EMAILS = [
-            "daniyalfaheem156@gmail.com","zenexus.pentest@gmail.com","abubakararshad4020@gmail.com","sarmadhayat2019@gmail.com",
-            "malak56yaseen@gmail.com","saeedahmad0323325078809@gmail.com","usmanghaniw890@gmail.com","junaidfps@gmail.com",
-            "zaragotamail@gmail.com","maryamamjadedu.22@gmail.com","bolasiwajuola@gmail.com","zahhaktariq@gmail.com",
-            "logsgamer507@gmail.com","toobaghazi19@gmail.com","221544@students.au.edu.pk","amans260304@gmail.com",
-            "youshakamal924@gmail.com","hamzaanjum77@gmail.com","ahmedmuneeb812@gmail.com","znaeem445@gmail.com",
-            "insiabatool83@gmail.com","umairwajiha50@gmail.com","mamoongondal06@gmail.com","h.sultan013578@gmail.com",
-            "juttgill21336@gmail.com","mamoongondal09@gmail.com","maqil3293@gmail.com","farooqtariq211@gmail.com",
-            "ochelights@gmail.com","abhisheksingh740906@gmail.com","kambalavihitha@gmail.com","bhattiabdurehman987@gmail.com",
-            "aa.ayeshaarif@gmail.com","samtextechnology.info@gmail.com","muhamad.huzaiffa@gmail.com","abdullahjutt4102004@gmail.com",
-            "kamalchalumuri@gmail.com","daniyalfaheem1@gmail.com", "daniyalfaheem3@gmail.com"
+            "h.aqsatahir2340@gmail.com", "ajamkhan5454@outlook.com", "kamranakbar7555@gmail.com",
+            "samtextechnology.info@gmail.com", "aa.ayeshaarif@gmail.com", "abdulrehmanbhatti919@gmail.com",
+            "kambalavihitha@gmail.com", "abhisheksingh740906@gmail.com", "ochelights@gmail.com",
+            "m.sameer.malik113@gmail.com", "toobst09@gmail.com", "malibutt019@gmail.com",
+            "mamoongondal09@gmail.com", "shahyankhan886@gmail.com", "muzammilh21336@gmail.com",
+            "zaibzafar936@gmail.com", "malak56yaseen@gmail.com", "umairwajiha50@gmail.com",
+            "insiabatool83@gmail.com", "zohaibnaeem501@gmail.com", "ahmedmuneeb812@gmail.com",
+            "hamzaanjum77@gmail.com", "youshakamal924@gmail.com", "apekshya.gh@gmail.com",
+            "amans260304@gmail.com", "toobaghazi19@gmail.com", "logsgamer507@gmail.com",
+            "zahhaktariq@gmail.com", "maryamamjadedu.22@gmail.com", "h.sultan013578@gmail.com",
+            "lainola@yahoo.com", "anynomus350@gmail.com", "zaragotamail@gmail.com",
+            "mr.radeelahmad@icloud.com", "zenexus.pentest@gmail.com", "sarmadhayat2019@gmail.com",
+            "daniyalfaheem4@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
+            "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
+            "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
+            "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
+            "kamalchalumuri@gmail.com"
         ];
         
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdsXrqliNS717VOBA7xgv8hLYdRyQwRMvkPp9-vWFUKqxNs6oT708dFNL-ZAPZX6e05g/exec"; 
@@ -155,17 +160,10 @@
             { id: 3, q: "Which of these is a common vulnerability in web applications?", options: ["Cross-Site Scripting (XSS)", "Ethernet Spoofing", "MAC Flooding", "BIOS Flashing"], answer: 0 }
         ];
 
-        let mediaRecorder;
-        let recordedChunks = [];
-        let stream;
-        let userEmail = "";
-        let userName = "";
-        let isTestActive = false;
-        let testStartTime = 0; 
+        let mediaRecorder, stream, userEmail = "", userName = "", userWhatsapp = "";
+        let isTestActive = false, isSetupActive = false, testStartTime = 0, recordedChunks = [];
         
-        let faceDetection;
-        let aiInitialized = false;
-        let violationStrikes = 0;
+        let faceDetection, aiInitialized = false, violationStrikes = 0, setupValidFrames = 0;
 
         function initializeAI() {
             try {
@@ -173,15 +171,13 @@
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`;
                 }});
                 
-                // STRICT MODE SETTINGS
                 faceDetection.setOptions({
                     model: 'short', 
-                    minDetectionConfidence: 0.90 // Only accepts 90% perfect faces
+                    minDetectionConfidence: 0.90 
                 });
                 
                 faceDetection.onResults(onFaceResults);
                 aiInitialized = true;
-                console.log("Ultra-Strict AI Initialized");
             } catch (e) {
                 console.error("AI Init Failed: ", e);
             }
@@ -192,18 +188,20 @@
         function verifyCandidate() {
             const nameInput = document.getElementById('user-name').value.trim();
             const emailInput = document.getElementById('user-email').value.trim().toLowerCase();
+            const whatsappInput = document.getElementById('user-whatsapp').value.trim();
             
-            document.getElementById('name-error').classList.add('hidden');
+            document.getElementById('fields-error').classList.add('hidden');
             document.getElementById('email-error').classList.add('hidden');
 
-            if (!nameInput) {
-                document.getElementById('name-error').classList.remove('hidden');
+            if (!nameInput || !whatsappInput) {
+                document.getElementById('fields-error').classList.remove('hidden');
                 return;
             }
 
             if (ALLOWED_EMAILS.includes(emailInput)) {
                 userEmail = emailInput;
                 userName = nameInput;
+                userWhatsapp = whatsappInput;
                 
                 if (localStorage.getItem(`fwx_done_${userEmail}`)) {
                     userName = localStorage.getItem(`fwx_name_${userEmail}`) || userName;
@@ -230,31 +228,143 @@
                 });
                 
                 document.getElementById('video-preview').srcObject = stream;
-                startBtn.innerText = "Scanning Face Visibility...";
                 
                 const scanLine = document.getElementById('scan-line');
                 scanLine.classList.remove('hidden');
                 let position = 0, direction = 1;
-                const scanInterval = setInterval(() => {
+                setInterval(() => {
                     position += 5 * direction;
                     if(position > 200 || position < 0) direction *= -1;
                     scanLine.style.transform = `translateY(${position}px)`;
                 }, 50);
 
-                setTimeout(() => {
-                    clearInterval(scanInterval);
-                    scanLine.classList.add('hidden');
-                    document.getElementById('video-container').classList.replace('border-gray-600', 'border-green-500');
-                    startBtn.innerText = "Face Verified. Start Assessment";
-                    startBtn.classList.replace('bg-[#1A56DB]', 'bg-green-600');
-                    startBtn.disabled = false;
-                    startBtn.onclick = startAssessment; 
-                }, 3000);
+                // START PRE-TEST STRICT FACE LOCK
+                isSetupActive = true;
+                startBtn.innerText = "Verifying Face... Please look straight at the camera";
+                runProctoringLoopForSetup();
 
             } catch (err) {
                 alert("Camera & Microphone access is required to proceed!");
                 startBtn.innerText = "Try Again";
                 startBtn.disabled = false;
+            }
+        }
+
+        async function runProctoringLoopForSetup() {
+            if (!isSetupActive) return;
+            const video = document.getElementById('video-preview');
+
+            if (video.readyState === 4 && aiInitialized) {
+                await faceDetection.send({image: video});
+            }
+            setTimeout(runProctoringLoopForSetup, 500); 
+        }
+
+        function isWearingMask(videoEl, bbox) {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoEl.videoWidth || 320;
+                canvas.height = videoEl.videoHeight || 240;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+
+                let x = Math.max(0, bbox.xCenter * canvas.width - (bbox.width * canvas.width)/2);
+                let y = Math.max(0, bbox.yCenter * canvas.height - (bbox.height * canvas.height)/2);
+                let w = Math.min(canvas.width - x, bbox.width * canvas.width);
+                let h = Math.min(canvas.height - y, bbox.height * canvas.height);
+
+                if(w <= 0 || h <= 0) return false;
+
+                const foreheadData = ctx.getImageData(x + w*0.3, y + h*0.1, w*0.4, h*0.2).data;
+                const lowerFaceData = ctx.getImageData(x + w*0.3, y + h*0.65, w*0.4, h*0.3).data;
+
+                const getAvg = (data) => {
+                    let r=0, g=0, b=0, c=0;
+                    for(let i=0; i<data.length; i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; c++; }
+                    return {r: r/c, g: g/c, b: b/c};
+                }
+
+                const fColor = getAvg(foreheadData);
+                const lColor = getAvg(lowerFaceData);
+                const colorDiff = Math.abs(fColor.r - lColor.r) + Math.abs(fColor.g - lColor.g) + Math.abs(fColor.b - lColor.b);
+                
+                if(colorDiff > 85) return true; 
+                return false;
+            } catch(e) { return false; }
+        }
+
+        function onFaceResults(results) {
+            if (!isTestActive && !isSetupActive) return;
+            
+            let isViolating = false;
+            let title = "", desc = "";
+            const videoEl = isTestActive ? document.getElementById('mini-video-preview') : document.getElementById('video-preview');
+
+            if (!results.detections || results.detections.length === 0) {
+                isViolating = true;
+                title = "FACE NOT DETECTED";
+                desc = "Please look directly at the camera.";
+            } else if (results.detections.length > 1) {
+                isViolating = true;
+                title = "MULTIPLE PERSONS DETECTED";
+                desc = "Only one candidate is allowed in the frame.";
+            } else {
+                const bbox = results.detections[0].boundingBox;
+                if (bbox.width < 0.25) {
+                    isViolating = true;
+                    title = "POSITIONING ERROR";
+                    desc = "Your face is too far. Move closer.";
+                } else if (bbox.xCenter < 0.2 || bbox.xCenter > 0.8) {
+                    isViolating = true;
+                    title = "FACE NOT CENTERED";
+                    desc = "Please keep your face perfectly centered.";
+                } else if (isWearingMask(videoEl, bbox)) {
+                    isViolating = true;
+                    title = "MASK DETECTED";
+                    desc = "Strict protocol: No masks are allowed.";
+                }
+            }
+
+            // ==================== PRE-TEST SETUP LOCK ====================
+            if (isSetupActive) {
+                const startBtn = document.getElementById('start-btn');
+                if (isViolating) {
+                    setupValidFrames = 0;
+                    startBtn.innerText = "Error: " + title;
+                    startBtn.classList.remove('bg-[#1A56DB]', 'bg-green-600', 'bg-yellow-500');
+                    startBtn.classList.add('bg-red-600');
+                } else {
+                    setupValidFrames++;
+                    startBtn.innerText = `Face Detected! Confirming... (${setupValidFrames}/3)`;
+                    startBtn.classList.remove('bg-[#1A56DB]', 'bg-red-600', 'bg-green-600');
+                    startBtn.classList.add('bg-yellow-500');
+                    
+                    if (setupValidFrames >= 3) {
+                        isSetupActive = false; // Stop checking
+                        document.getElementById('video-container').classList.replace('border-gray-600', 'border-green-500');
+                        document.getElementById('scan-line').classList.add('hidden');
+                        startBtn.innerText = "Face Verified. Start Assessment";
+                        startBtn.classList.remove('bg-yellow-500');
+                        startBtn.classList.add('bg-green-600');
+                        startBtn.disabled = false;
+                        startBtn.onclick = startAssessment;
+                    }
+                }
+                return;
+            }
+
+            // ==================== LIVE TEST PROCTORING ====================
+            const screen = document.getElementById('security-violation-screen');
+            if (isViolating) {
+                violationStrikes++;
+                if (violationStrikes >= 2) triggerViolation(title, desc, false);
+            } else {
+                violationStrikes = 0;
+                if (screen.getAttribute('data-type') === 'camera' && !screen.classList.contains('hidden')) {
+                    screen.classList.add('hidden');
+                    screen.removeAttribute('data-type');
+                    document.getElementById('test-content-area').classList.remove('blur-test');
+                }
             }
         }
 
@@ -281,55 +391,10 @@
             startRecording();
             startTimer(15 * 60);
 
-            runProctoringLoop();
+            runLiveProctoringLoop();
         }
 
-        function startRecording() {
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-            mediaRecorder.start();
-        }
-
-        // Custom Strict Mask Detection Logic
-        function isWearingMask(videoEl, bbox) {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = videoEl.videoWidth || 320;
-                canvas.height = videoEl.videoHeight || 240;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-
-                let x = Math.max(0, bbox.xCenter * canvas.width - (bbox.width * canvas.width)/2);
-                let y = Math.max(0, bbox.yCenter * canvas.height - (bbox.height * canvas.height)/2);
-                let w = Math.min(canvas.width - x, bbox.width * canvas.width);
-                let h = Math.min(canvas.height - y, bbox.height * canvas.height);
-
-                if(w <= 0 || h <= 0) return false;
-
-                // Extract Forehead & Mouth pixels
-                const foreheadData = ctx.getImageData(x + w*0.3, y + h*0.1, w*0.4, h*0.2).data;
-                const lowerFaceData = ctx.getImageData(x + w*0.3, y + h*0.65, w*0.4, h*0.3).data;
-
-                const getAvg = (data) => {
-                    let r=0, g=0, b=0, c=0;
-                    for(let i=0; i<data.length; i+=4) { r+=data[i]; g+=data[i+1]; b+=data[i+2]; c++; }
-                    return {r: r/c, g: g/c, b: b/c};
-                }
-
-                const fColor = getAvg(foreheadData);
-                const lColor = getAvg(lowerFaceData);
-                
-                // Calculate drastic color shift
-                const colorDiff = Math.abs(fColor.r - lColor.r) + Math.abs(fColor.g - lColor.g) + Math.abs(fColor.b - lColor.b);
-                
-                if(colorDiff > 85) return true; // Mask likely present
-                return false;
-            } catch(e) {
-                return false;
-            }
-        }
-
-        async function runProctoringLoop() {
+        async function runLiveProctoringLoop() {
             if (!isTestActive) return;
             const video = document.getElementById('mini-video-preview');
 
@@ -352,57 +417,13 @@
                     await faceDetection.send({image: video});
                 }
             }
-            setTimeout(runProctoringLoop, 600); // Super fast 600ms checking
+            setTimeout(runLiveProctoringLoop, 600);
         }
 
-        function onFaceResults(results) {
-            if (!isTestActive) return;
-            
-            let isViolating = false;
-            let title = "", desc = "";
-
-            if (!results.detections || results.detections.length === 0) {
-                isViolating = true;
-                title = "FACE NOT DETECTED";
-                desc = "Please look directly at the camera. Ensure your face is fully visible without obstructions.";
-            } else if (results.detections.length > 1) {
-                isViolating = true;
-                title = "MULTIPLE PERSONS DETECTED";
-                desc = "Only one candidate is allowed in the frame.";
-            } else {
-                const bbox = results.detections[0].boundingBox;
-                const video = document.getElementById('mini-video-preview');
-
-                if (bbox.width < 0.25) {
-                    isViolating = true;
-                    title = "POSITIONING ERROR";
-                    desc = "Your face is too far. Move closer to the camera.";
-                } else if (bbox.xCenter < 0.2 || bbox.xCenter > 0.8) {
-                    isViolating = true;
-                    title = "FACE NOT CENTERED";
-                    desc = "Please keep your face perfectly centered in the frame.";
-                } else if (isWearingMask(video, bbox)) {
-                    isViolating = true;
-                    title = "MASK OR COVERING DETECTED";
-                    desc = "Strict protocol: No masks or face coverings are allowed during the assessment.";
-                }
-            }
-
-            const screen = document.getElementById('security-violation-screen');
-            
-            if (isViolating) {
-                violationStrikes++;
-                if (violationStrikes >= 2) {
-                    triggerViolation(title, desc, false);
-                }
-            } else {
-                violationStrikes = 0;
-                if (screen.getAttribute('data-type') === 'camera' && !screen.classList.contains('hidden')) {
-                    screen.classList.add('hidden');
-                    screen.removeAttribute('data-type');
-                    document.getElementById('test-content-area').classList.remove('blur-test');
-                }
-            }
+        function startRecording() {
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.start();
         }
 
         document.addEventListener('fullscreenchange', () => {
@@ -421,7 +442,6 @@
             const screen = document.getElementById('security-violation-screen');
             document.getElementById('violation-title').innerText = title;
             document.getElementById('violation-desc').innerText = desc;
-            
             document.getElementById('test-content-area').classList.add('blur-test');
 
             if (requiresClick) {
@@ -498,12 +518,18 @@
                         mimeType: 'video/webm',
                         base64: base64data,
                         name: userName,           
-                        email: userEmail,         
+                        email: userEmail,
+                        whatsapp: userWhatsapp, // WhatsApp Field Added     
                         score: percentage,        
                         timeTaken: exactTimeStr   
                     };
 
-                    fetch(GOOGLE_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) })
+                    // FIXED: Text/plain headers to bypass Google Apps Script CORS block
+                    fetch(GOOGLE_SCRIPT_URL, { 
+                        method: "POST", 
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(payload) 
+                    })
                     .then(res => res.text())
                     .then(() => calculateAndShowResults(true))
                     .catch(err => { console.error(err); calculateAndShowResults(true); });
