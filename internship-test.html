@@ -31,7 +31,6 @@
         </button>
     </div>
 
-    <!-- Login Screen -->
     <div id="screen-email" class="glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl transition-all">
         <img id="brand-logo" src="logo.png" alt="FortifyWebX" class="h-16 mx-auto mb-6 rounded-lg object-contain" onerror="this.src='https://via.placeholder.com/200x64?text=FortifyWebX'">
         <h2 class="text-2xl font-bold mb-2">Internship Portal</h2>
@@ -48,7 +47,6 @@
         <p id="fields-error" class="text-red-500 text-sm mt-3 hidden">Please fill all fields correctly.</p>
     </div>
 
-    <!-- Setup Screen -->
     <div id="screen-setup" class="glass-panel p-8 rounded-2xl max-w-lg w-full text-center shadow-2xl hidden transition-all">
         <h2 class="text-xl font-bold mb-4 text-[#00D4FF]">Identity & Hardware Verification</h2>
         <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <strong class="text-red-400">The assessment will run in Full-Screen mode.</strong></p>
@@ -63,7 +61,6 @@
         </button>
     </div>
 
-    <!-- Test Screen -->
     <div id="screen-test" class="hidden w-full max-w-3xl glass-panel p-8 rounded-2xl">
         <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
             <h2 class="text-2xl font-bold gradient-text">FortifyWebX Assessment</h2>
@@ -79,17 +76,15 @@
         </div>
     </div>
 
-    <!-- Uploading Screen -->
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
         <div class="loader"></div>
         <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Analyzing Session Data...</h2>
-        <p class="text-gray-400 text-sm">Please DO NOT close this tab. We are analyzing your session to verify that the assessment was completed correctly without any violations.</p>
+        <p class="text-gray-400 text-sm">We are analyzing your session to verify that the assessment was completed correctly without any violations. Please DO NOT close this tab.</p>
     </div>
 
-    <!-- Result Screen -->
     <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
         <h2 class="text-3xl font-extrabold mb-2">Assessment Results</h2>
-        <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">⚠️ You have already taken this test! Your saved result is displayed below.</p>
+        <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">You have already taken this test! Your saved result is displayed below.</p>
         
         <div class="max-w-md mx-auto my-6 bg-gray-800 rounded-full h-6 overflow-hidden relative border border-gray-700">
             <div id="result-bar" class="bg-gradient-to-r from-[#00D4FF] to-[#1A56DB] h-full transition-all duration-1000" style="width: 0%"></div>
@@ -119,14 +114,13 @@
             <div class="bg-black/40 p-4 rounded-lg border border-white/10 w-full md:w-1/2">
                 <p class="text-xs text-[#00D4FF] mb-1">LinkedIn Post Copy Text:</p>
                 <p class="italic text-gray-300 text-xs mb-3">
-                    I just secured <span id="share-score"></span> in the @FortifyWebX Cyber Security Internship Assessment and am eligible for the next phase! 🚀 #FortifyWebX #CyberSecurity #Internship
+                    I just secured <span id="share-score"></span> in the @FortifyWebX Cyber Security Internship Assessment and am eligible for the next phase! #FortifyWebX #CyberSecurity #Internship
                 </p>
                 <a href="https://www.linkedin.com/feed/" target="_blank" class="bg-[#0077b5] hover:bg-[#005582] text-white font-bold py-2 px-4 rounded transition block text-center text-sm">Open LinkedIn &rarr;</a>
             </div>
         </div>
     </div>
 
-    <!-- Mini Proctor Video -->
     <div id="mini-video-container" class="hidden fixed bottom-4 right-4 w-40 h-32 bg-black border-2 border-green-500 rounded-lg overflow-hidden shadow-2xl z-50">
         <video id="mini-video-preview" class="w-full h-full object-cover" autoplay muted playsinline></video>
     </div>
@@ -145,14 +139,14 @@
             "zahhaktariq@gmail.com", "maryamamjadedu.22@gmail.com", "h.sultan013578@gmail.com",
             "lainola@yahoo.com", "anynomus350@gmail.com", "zaragotamail@gmail.com",
             "mr.radeelahmad@icloud.com", "zenexus.pentest@gmail.com", "sarmadhayat2019@gmail.com",
-            "daniyalfaheem4@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
+            "daniyalfaheem5@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
             "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
             "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
             "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
             "kamalchalumuri@gmail.com"
         ];
         
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdsXrqliNS717VOBA7xgv8hLYdRyQwRMvkPp9-vWFUKqxNs6oT708dFNL-ZAPZX6e05g/exec"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaP0qv8YNd5e7Av-fX8ds3g3OdQS9pbVm9PL1zP8rz2RGRINWNI1ak6kskEqCECnY/exec"; 
 
         const questions = [
             { id: 1, q: "Which tool is best for analyzing network traffic?", options: ["Nmap", "Wireshark", "Metasploit", "Burp Suite"], answer: 1 },
@@ -238,7 +232,6 @@
                     scanLine.style.transform = `translateY(${position}px)`;
                 }, 50);
 
-                // START PRE-TEST STRICT FACE LOCK
                 isSetupActive = true;
                 startBtn.innerText = "Verifying Face... Please look straight at the camera";
                 runProctoringLoopForSetup();
@@ -325,7 +318,6 @@
                 }
             }
 
-            // ==================== PRE-TEST SETUP LOCK ====================
             if (isSetupActive) {
                 const startBtn = document.getElementById('start-btn');
                 if (isViolating) {
@@ -340,7 +332,7 @@
                     startBtn.classList.add('bg-yellow-500');
                     
                     if (setupValidFrames >= 3) {
-                        isSetupActive = false; // Stop checking
+                        isSetupActive = false;
                         document.getElementById('video-container').classList.replace('border-gray-600', 'border-green-500');
                         document.getElementById('scan-line').classList.add('hidden');
                         startBtn.innerText = "Face Verified. Start Assessment";
@@ -353,7 +345,6 @@
                 return;
             }
 
-            // ==================== LIVE TEST PROCTORING ====================
             const screen = document.getElementById('security-violation-screen');
             if (isViolating) {
                 violationStrikes++;
@@ -519,20 +510,30 @@
                         base64: base64data,
                         name: userName,           
                         email: userEmail,
-                        whatsapp: userWhatsapp, // WhatsApp Field Added     
+                        whatsapp: userWhatsapp, 
                         score: percentage,        
                         timeTaken: exactTimeStr   
                     };
 
-                    // FIXED: Text/plain headers to bypass Google Apps Script CORS block
                     fetch(GOOGLE_SCRIPT_URL, { 
                         method: "POST", 
                         headers: { "Content-Type": "text/plain;charset=utf-8" },
                         body: JSON.stringify(payload) 
                     })
-                    .then(res => res.text())
-                    .then(() => calculateAndShowResults(true))
-                    .catch(err => { console.error(err); calculateAndShowResults(true); });
+                    .then(res => res.json())
+                    .then(data => {
+                        if(data.status === "success") {
+                            calculateAndShowResults(true);
+                        } else {
+                            alert("Database Error: " + data.message);
+                            calculateAndShowResults(true);
+                        }
+                    })
+                    .catch(err => { 
+                        console.error(err); 
+                        alert("Sync Error. Showing local results.");
+                        calculateAndShowResults(true); 
+                    });
                 };
             }, 1000); 
         }
