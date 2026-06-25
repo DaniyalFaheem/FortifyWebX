@@ -79,7 +79,7 @@
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
         <div class="loader"></div>
         <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Analyzing Session Data...</h2>
-        <p class="text-gray-300 text-sm">Patience please, this may take time because we are deeply analyzing your session to verify that the assessment was completed correctly without any violations. Please DO NOT close this tab.</p>
+        <p class="text-gray-300 text-sm">Patience please, this may take time because we are deeply analyzing your session to verify that the assessment was completed correctly without any security violations. Please DO NOT close this tab until your certificate appears.</p>
     </div>
 
     <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
@@ -139,13 +139,14 @@
             "zahhaktariq@gmail.com", "maryamamjadedu.22@gmail.com", "h.sultan013578@gmail.com",
             "lainola@yahoo.com", "anynomus350@gmail.com", "zaragotamail@gmail.com",
             "mr.radeelahmad@icloud.com", "zenexus.pentest@gmail.com", "sarmadhayat2019@gmail.com",
-            "daniyalfaheem7@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
+            "daniyalfaheem156@gmail.com", "abubakararshad4020@gmail.com", "saeedahmad0323325078809@gmail.com",
             "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
             "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
             "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
-            "kamalchalumuri@gmail.com", "alitalibhussain12@gmail.com"
+            "kamalchalumuri@gmail.com", "daniyalfaheem8@gmail.com", "alitalibhussain12@gmail.com"
         ];
         
+        // ---------- YAHAN NAYA GOOGLE APPS SCRIPT URL PASTE KAREIN ----------
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvVI8VE_w1xEghzVZLByIXOuAbFJHtUCukMbvXSel-ynujee_CLu-ympTadUoOk6Zg4A/exec";
 
         const questions = [
@@ -184,6 +185,7 @@
         let mediaRecorder, stream, userEmail = "", userName = "", userWhatsapp = "";
         let isTestActive = false, isSetupActive = false, testStartTime = 0, recordedChunks = [];
         let faceDetection, aiInitialized = false, violationStrikes = 0, setupValidFrames = 0;
+        let isUploadingData = false;
 
         function initializeAI() {
             try {
@@ -198,6 +200,12 @@
             }
         }
         window.addEventListener('DOMContentLoaded', initializeAI);
+
+        window.onbeforeunload = function() {
+            if (isUploadingData) {
+                return "Patience please, we are deeply analyzing your session. Leaving now will cancel your submission!";
+            }
+        };
 
         function verifyCandidate() {
             const nameInput = document.getElementById('user-name').value.trim();
@@ -432,7 +440,13 @@
         }
 
         function startRecording() {
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            // Yahan Codec set kiya hai limit ke andar rakhne ke liye
+            let options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 50000 }; 
+            try {
+                mediaRecorder = new MediaRecorder(stream, options);
+            } catch (e) {
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' }); 
+            }
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
             mediaRecorder.start();
         }
@@ -490,11 +504,12 @@
         function finishTestAndUpload() {
             if(!isTestActive) return;
             isTestActive = false; 
+            isUploadingData = true; 
             
             const submitBtn = document.getElementById('submit-test-btn');
             if(submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerText = "Processing...";
+                submitBtn.innerText = "Processing Data...";
             }
             
             let timeTakenMs = Date.now() - testStartTime;
@@ -519,7 +534,6 @@
             document.getElementById('screen-test').classList.add('hidden');
             document.getElementById('mini-video-container').classList.add('hidden');
             document.getElementById('security-violation-screen').classList.add('hidden');
-            
             document.getElementById('screen-uploading').classList.remove('hidden');
 
             const dataPayload = {
@@ -532,45 +546,59 @@
             };
 
             fetch(GOOGLE_SCRIPT_URL, { 
+                redirect: "follow",
                 method: "POST", 
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(dataPayload) 
             })
             .then(res => res.json())
             .then(dataResponse => {
                 
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                
-                reader.onloadend = function() {
-                    const base64data = reader.result.split(',')[1];
-                    const safeEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
-                    const safeName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+                if(dataResponse.status === "success" || dataResponse.status === "ok") {
                     
-                    const videoPayload = {
-                        type: "video",
-                        filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
-                        mimeType: 'video/webm',
-                        base64: base64data,
-                        email: userEmail
-                    };
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    
+                    reader.onloadend = function() {
+                        const base64data = reader.result.split(',')[1];
+                        const safeEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
+                        const safeName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+                        
+                        const videoPayload = {
+                            type: "video",
+                            filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
+                            mimeType: 'video/webm',
+                            base64: base64data,
+                            email: userEmail
+                        };
 
-                    fetch(GOOGLE_SCRIPT_URL, { 
-                        method: "POST", 
-                        body: JSON.stringify(videoPayload) 
-                    })
-                    .then(res => res.json())
-                    .then(videoResponse => {
-                        calculateAndShowResults(true);
-                    })
-                    .catch(e => {
-                        console.log("Video Sync Error", e);
-                        calculateAndShowResults(true);
-                    });
-                };
+                        fetch(GOOGLE_SCRIPT_URL, { 
+                            redirect: "follow",
+                            method: "POST", 
+                            headers: { "Content-Type": "text/plain;charset=utf-8" },
+                            body: JSON.stringify(videoPayload) 
+                        })
+                        .then(res => res.json())
+                        .then(videoResponse => {
+                            isUploadingData = false;
+                            calculateAndShowResults(true);
+                        })
+                        .catch(e => {
+                            console.log("Video Upload Error:", e);
+                            isUploadingData = false;
+                            calculateAndShowResults(true);
+                        });
+                    };
+                } else {
+                    console.log("Database response error");
+                    isUploadingData = false;
+                    calculateAndShowResults(true);
+                }
             })
             .catch(err => { 
-                console.error(err); 
+                console.error("Fetch Error:", err); 
+                isUploadingData = false;
                 calculateAndShowResults(true); 
             });
         }
@@ -592,7 +620,7 @@
                     reviewHTML += `<p class="text-green-400 text-sm mb-2"><i class="fa-solid fa-check mr-2"></i> Q${q.id}: Correct</p>`;
                 } else {
                     reviewHTML += `<p class="text-red-400 text-sm mb-1"><i class="fa-solid fa-xmark mr-2"></i> Q${q.id}: Incorrect</p>`;
-                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <b>${q.options[q.answer]}</b></p>`;
+                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <strong>${q.options[q.answer]}</strong></p>`;
                 }
             });
 
