@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" crossorigin="anonymous"></script>
 
     <style>
@@ -30,7 +31,6 @@
         </button>
     </div>
 
-    <!-- Login Screen -->
     <div id="screen-email" class="glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl transition-all">
         <img id="brand-logo" src="logo.png" alt="FortifyWebX" class="h-16 mx-auto mb-6 rounded-lg object-contain" onerror="this.src='https://via.placeholder.com/200x64?text=FortifyWebX'">
         <h2 class="text-2xl font-bold mb-2">Internship Portal</h2>
@@ -47,7 +47,6 @@
         <p id="fields-error" class="text-red-500 text-sm mt-3 hidden">Please fill all fields correctly.</p>
     </div>
 
-    <!-- Setup Screen -->
     <div id="screen-setup" class="glass-panel p-8 rounded-2xl max-w-lg w-full text-center shadow-2xl hidden transition-all">
         <h2 class="text-xl font-bold mb-4 text-[#00D4FF]">Identity & Hardware Verification</h2>
         <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <b class="text-red-400">The assessment will run in Full-Screen mode.</b></p>
@@ -62,7 +61,6 @@
         </button>
     </div>
 
-    <!-- Test Screen -->
     <div id="screen-test" class="hidden w-full max-w-3xl glass-panel p-8 rounded-2xl">
         <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
             <h2 class="text-2xl font-bold gradient-text">FortifyWebX Assessment</h2>
@@ -78,14 +76,13 @@
         </div>
     </div>
 
-    <!-- Uploading Screen -->
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
         <div class="loader"></div>
-        <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Analyzing Session Data...</h2>
-        <p id="upload-status-text" class="text-gray-300 text-sm font-bold text-yellow-400">WARNING: Do not close this tab or refresh the page. We are securely uploading your proctoring video. Closing this tab will mark your test as FAILED.</p>
+        <h2 class="text-xl font-bold text-[#00D4FF] mb-3">Analyzing Session Data...</h2>
+        <p class="text-gray-300 text-sm mb-4">Please be patient. This process may take a few moments. We are deeply analyzing your session data and proctoring video to verify that the assessment was completed securely and correctly without any violations.</p>
+        <p id="upload-status-text" class="text-red-400 text-sm font-bold bg-red-900/30 p-2 rounded border border-red-500/50">WARNING: Do not close this tab or refresh the page. Closing this tab will mark your test as FAILED.</p>
     </div>
 
-    <!-- Failed Submission Screen -->
     <div id="screen-failed" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl border border-red-500/50">
         <i class="fa-solid fa-circle-xmark text-6xl text-red-500 mb-4 animate-pulse"></i>
         <h2 class="text-2xl font-bold text-red-500 mb-2">Test Submission Failed</h2>
@@ -93,7 +90,6 @@
         <p class="text-white text-xs bg-red-900/50 p-3 rounded">Your details have been logged. Please contact FortifyWebX administration to review your case.</p>
     </div>
 
-    <!-- Result Screen -->
     <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
         <h2 class="text-3xl font-extrabold mb-2">Assessment Results</h2>
         <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">You have already taken this test! Your saved result is displayed below.</p>
@@ -155,10 +151,10 @@
             "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
             "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
             "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
-            "kamalchalumuri@gmail.com", "daniyalfaheem10@gmail.com", "2024f-mulug-0401@mul.edu.pk", "asadduckman@gmail.com"
+            "kamalchalumuri@gmail.com", "daniyalfaheem11@gmail.com", "2024f-mulug-0401@mul.edu.pk", "asadduckman@gmail.com"
         ];
         
-        // Version 10 URL Integrated
+        // Version 10 URL 
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9Stb0LQPCjUbqBD5C-PKT0i4sSN19iUWuQMm1D-cipkKtfX6DamdLWV3SaAvfba1X/exec";
 
         const questions = [
@@ -212,7 +208,7 @@
         window.addEventListener('DOMContentLoaded', initializeAI);
 
         window.onbeforeunload = function() {
-            if (isUploadingData) return "Patience please, we are deeply analyzing your session. Leaving now will cancel your submission!";
+            if (isUploadingData) return "Please wait, we are deeply analyzing your session data. Leaving now will cancel your submission!";
         };
 
         function verifyCandidate() {
@@ -279,7 +275,7 @@
             if (!isSetupActive) return;
             const video = document.getElementById('video-preview');
             if (video.readyState === 4 && aiInitialized) await faceDetection.send({image: video});
-            setTimeout(runProctoringLoopForSetup, 500); 
+            setTimeout(runProctoringLoopForSetup, 400); 
         }
 
         function isWearingMask(videoEl, bbox) {
@@ -321,28 +317,30 @@
             let title = "", desc = "";
             const videoEl = isTestActive ? document.getElementById('mini-video-preview') : document.getElementById('video-preview');
 
+            // --- STRICT PROCTORING LOGIC ADDED HERE ---
             if (!results.detections || results.detections.length === 0) {
                 isViolating = true;
                 title = "FACE NOT DETECTED";
-                desc = "Please look directly at the camera.";
+                desc = "Your face is completely missing from the frame. Please look directly at the camera.";
             } else if (results.detections.length > 1) {
                 isViolating = true;
                 title = "MULTIPLE PERSONS DETECTED";
                 desc = "Only one candidate is allowed in the frame.";
             } else {
                 const bbox = results.detections[0].boundingBox;
-                if (bbox.width < 0.25) {
+                // strict positioning checks
+                if (bbox.width < 0.20) {
                     isViolating = true;
                     title = "POSITIONING ERROR";
-                    desc = "Your face is too far. Move closer.";
-                } else if (bbox.xCenter < 0.2 || bbox.xCenter > 0.8) {
+                    desc = "Your face is too far. Move closer to the camera.";
+                } else if (bbox.xCenter < 0.15 || bbox.xCenter > 0.85) {
                     isViolating = true;
                     title = "FACE NOT CENTERED";
-                    desc = "Please keep your face perfectly centered.";
+                    desc = "Please keep your face perfectly centered in the frame.";
                 } else if (isWearingMask(videoEl, bbox)) {
                     isViolating = true;
-                    title = "MASK DETECTED";
-                    desc = "Strict protocol: No masks are allowed.";
+                    title = "FACE COVERED / MASK DETECTED";
+                    desc = "Strict protocol: No masks or hands covering the face are allowed.";
                 }
             }
             
@@ -371,8 +369,9 @@
                     }
                 }
             } else if (isViolating) {
+                // REDUCED STRIKE COUNT FOR FASTER ERROR TRIGGER (Catches quick face covers)
                 violationStrikes++;
-                if (violationStrikes >= 3) triggerViolation("VIOLATION", "Face lost from frame.", false);
+                if (violationStrikes >= 2) triggerViolation(title, desc, false);
             } else {
                 violationStrikes = 0;
                 const screen = document.getElementById('security-violation-screen');
@@ -401,6 +400,31 @@
             renderQuestions();
             startRecording();
             startTimer(15 * 60);
+            runLiveProctoringLoop();
+        }
+
+        async function runLiveProctoringLoop() {
+            if (!isTestActive) return;
+            const video = document.getElementById('mini-video-preview');
+            if (video.readyState === 4) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 64; canvas.height = 48;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                let totalBrightness = 0;
+                for (let i = 0; i < imgData.length; i += 4) {
+                    totalBrightness += (imgData[i] * 0.299) + (imgData[i+1] * 0.587) + (imgData[i+2] * 0.114);
+                }
+                let avgBrightness = totalBrightness / (canvas.width * canvas.height);
+                if (avgBrightness < 20) { 
+                    triggerViolation("LOW LIGHT DETECTED", "Your environment is too dark. Turn on the lights to continue.", false);
+                } else if (aiInitialized) {
+                    await faceDetection.send({image: video});
+                }
+            }
+            // FAST INTERVAL FOR QUICK CATCH
+            setTimeout(runLiveProctoringLoop, 400);
         }
 
         function startRecording() {
@@ -414,11 +438,13 @@
             mediaRecorder.start();
         }
 
+        // FULLY RESTORED VIOLATION FUNCTION (Updates text dynamically and blurs screen)
         function triggerViolation(title, desc, requiresClick) {
             const screen = document.getElementById('security-violation-screen');
             document.getElementById('violation-title').innerText = title;
             document.getElementById('violation-desc').innerText = desc;
             document.getElementById('test-content-area').classList.add('blur-test');
+            
             if (requiresClick) {
                 document.getElementById('violation-icon').className = "fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4 animate-bounce";
                 document.getElementById('resume-fullscreen-btn').classList.remove('hidden');
