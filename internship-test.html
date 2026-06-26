@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" crossorigin="anonymous"></script>
 
     <style>
@@ -31,6 +30,7 @@
         </button>
     </div>
 
+    <!-- Login Screen -->
     <div id="screen-email" class="glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl transition-all">
         <img id="brand-logo" src="logo.png" alt="FortifyWebX" class="h-16 mx-auto mb-6 rounded-lg object-contain" onerror="this.src='https://via.placeholder.com/200x64?text=FortifyWebX'">
         <h2 class="text-2xl font-bold mb-2">Internship Portal</h2>
@@ -47,6 +47,7 @@
         <p id="fields-error" class="text-red-500 text-sm mt-3 hidden">Please fill all fields correctly.</p>
     </div>
 
+    <!-- Setup Screen -->
     <div id="screen-setup" class="glass-panel p-8 rounded-2xl max-w-lg w-full text-center shadow-2xl hidden transition-all">
         <h2 class="text-xl font-bold mb-4 text-[#00D4FF]">Identity & Hardware Verification</h2>
         <p class="text-sm text-gray-300 mb-4">Your camera and microphone must be ON. Ensure your face is clearly visible (no masks). <b class="text-red-400">The assessment will run in Full-Screen mode.</b></p>
@@ -61,6 +62,7 @@
         </button>
     </div>
 
+    <!-- Test Screen -->
     <div id="screen-test" class="hidden w-full max-w-3xl glass-panel p-8 rounded-2xl">
         <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
             <h2 class="text-2xl font-bold gradient-text">FortifyWebX Assessment</h2>
@@ -76,12 +78,22 @@
         </div>
     </div>
 
+    <!-- Uploading Screen -->
     <div id="screen-uploading" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
         <div class="loader"></div>
         <h2 class="text-xl font-bold text-[#00D4FF] mb-2">Analyzing Session Data...</h2>
-        <p class="text-gray-300 text-sm">Patience please, this may take time because we are deeply analyzing your session to verify that the assessment was completed correctly without any security violations. Please DO NOT close this tab until your certificate appears.</p>
+        <p id="upload-status-text" class="text-gray-300 text-sm font-bold text-yellow-400">WARNING: Do not close this tab or refresh the page. We are securely uploading your proctoring video. Closing this tab will mark your test as FAILED.</p>
     </div>
 
+    <!-- Failed Submission Screen -->
+    <div id="screen-failed" class="hidden glass-panel p-8 rounded-2xl max-w-md w-full text-center shadow-2xl border border-red-500/50">
+        <i class="fa-solid fa-circle-xmark text-6xl text-red-500 mb-4 animate-pulse"></i>
+        <h2 class="text-2xl font-bold text-red-500 mb-2">Test Submission Failed</h2>
+        <p class="text-gray-300 text-sm mb-4">We could not upload your proctoring video due to a persistent network error or browser interruption. Security protocols require video evidence for evaluation.</p>
+        <p class="text-white text-xs bg-red-900/50 p-3 rounded">Your details have been logged. Please contact FortifyWebX administration to review your case.</p>
+    </div>
+
+    <!-- Result Screen -->
     <div id="screen-result" class="hidden glass-panel p-8 rounded-2xl max-w-4xl w-full text-center shadow-2xl">
         <h2 class="text-3xl font-extrabold mb-2">Assessment Results</h2>
         <p id="already-done-notice" class="text-yellow-400 font-bold hidden mb-4">You have already taken this test! Your saved result is displayed below.</p>
@@ -143,11 +155,11 @@
             "usmanghaniw41@gmail.com", "junaidfps@gmail.com", "bolasiwajuola@gmail.com",
             "znaeem445@gmail.com", "maqil3293@gmail.com", "farooqtariq211@gmail.com",
             "bhattiabdurehman987@gmail.com", "muhamad.huzaiffa@gmail.com", "abdullahjutt4102004@gmail.com",
-            "kamalchalumuri@gmail.com", "daniyalfaheem9@gmail.com", "alitalibhussain13@gmail.com", "asadshakeel331@gmail.com"
+            "kamalchalumuri@gmail.com", "daniyalfaheem10@gmail.com", "2024f-mulug-0401@mul.edu.pk", "asadduckman@gmail.com"
         ];
         
-        // ---------- YAHAN NAYA GOOGLE APPS SCRIPT URL PASTE KAREIN ----------
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzvVI8VE_w1xEghzVZLByIXOuAbFJHtUCukMbvXSel-ynujee_CLu-ympTadUoOk6Zg4A/exec";
+        // Version 10 URL Integrated
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9Stb0LQPCjUbqBD5C-PKT0i4sSN19iUWuQMm1D-cipkKtfX6DamdLWV3SaAvfba1X/exec";
 
         const questions = [
             { id: 1, q: "Which layer of the OSI model handles IP addressing and routing?", options: ["Layer 2 – Data Link", "Layer 3 – Network", "Layer 4 – Transport", "Layer 7 – Application"], answer: 1 },
@@ -195,16 +207,12 @@
                 faceDetection.setOptions({ model: 'short', minDetectionConfidence: 0.90 });
                 faceDetection.onResults(onFaceResults);
                 aiInitialized = true;
-            } catch (e) {
-                console.log("AI Error", e);
-            }
+            } catch (e) { console.log("AI Error", e); }
         }
         window.addEventListener('DOMContentLoaded', initializeAI);
 
         window.onbeforeunload = function() {
-            if (isUploadingData) {
-                return "Patience please, we are deeply analyzing your session. Leaving now will cancel your submission!";
-            }
+            if (isUploadingData) return "Patience please, we are deeply analyzing your session. Leaving now will cancel your submission!";
         };
 
         function verifyCandidate() {
@@ -224,13 +232,11 @@
                 userEmail = emailInput;
                 userName = nameInput;
                 userWhatsapp = whatsappInput;
-                
                 if (localStorage.getItem(`fwx_done_${userEmail}`)) {
                     userName = localStorage.getItem(`fwx_name_${userEmail}`) || userName;
                     showSavedResults();
                     return;
                 }
-                
                 document.getElementById('screen-email').classList.add('hidden');
                 document.getElementById('screen-setup').classList.remove('hidden');
             } else {
@@ -245,12 +251,11 @@
 
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 320, height: 240, frameRate: 15 }, 
+                    video: { width: 640, height: 480, frameRate: 24 }, 
                     audio: true 
                 });
                 
                 document.getElementById('video-preview').srcObject = stream;
-                
                 const scanLine = document.getElementById('scan-line');
                 scanLine.classList.remove('hidden');
                 let position = 0, direction = 1;
@@ -263,7 +268,6 @@
                 isSetupActive = true;
                 startBtn.innerText = "Verifying Face... Please look straight at the camera";
                 runProctoringLoopForSetup();
-
             } catch (err) {
                 alert("Camera & Microphone access is required to proceed!");
                 startBtn.innerText = "Try Again";
@@ -274,10 +278,7 @@
         async function runProctoringLoopForSetup() {
             if (!isSetupActive) return;
             const video = document.getElementById('video-preview');
-
-            if (video.readyState === 4 && aiInitialized) {
-                await faceDetection.send({image: video});
-            }
+            if (video.readyState === 4 && aiInitialized) await faceDetection.send({image: video});
             setTimeout(runProctoringLoopForSetup, 500); 
         }
 
@@ -316,7 +317,6 @@
 
         function onFaceResults(results) {
             if (!isTestActive && !isSetupActive) return;
-            
             let isViolating = false;
             let title = "", desc = "";
             const videoEl = isTestActive ? document.getElementById('mini-video-preview') : document.getElementById('video-preview');
@@ -345,7 +345,7 @@
                     desc = "Strict protocol: No masks are allowed.";
                 }
             }
-
+            
             if (isSetupActive) {
                 const startBtn = document.getElementById('start-btn');
                 if (isViolating) {
@@ -370,15 +370,12 @@
                         startBtn.onclick = startAssessment;
                     }
                 }
-                return;
-            }
-
-            const screen = document.getElementById('security-violation-screen');
-            if (isViolating) {
+            } else if (isViolating) {
                 violationStrikes++;
-                if (violationStrikes >= 2) triggerViolation(title, desc, false);
+                if (violationStrikes >= 3) triggerViolation("VIOLATION", "Face lost from frame.", false);
             } else {
                 violationStrikes = 0;
+                const screen = document.getElementById('security-violation-screen');
                 if (screen.getAttribute('data-type') === 'camera' && !screen.classList.contains('hidden')) {
                     screen.classList.add('hidden');
                     screen.removeAttribute('data-type');
@@ -390,58 +387,24 @@
         function enterFullScreen() {
             const docElm = document.documentElement;
             if (docElm.requestFullscreen) docElm.requestFullscreen();
-            else if (docElm.webkitRequestFullScreen) docElm.webkitRequestFullScreen();
-            else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
         }
 
         function startAssessment() {
             enterFullScreen(); 
             isTestActive = true;
             testStartTime = Date.now(); 
-
             document.getElementById('screen-setup').classList.add('hidden');
             document.getElementById('screen-test').classList.remove('hidden');
-            
             const miniVideo = document.getElementById('mini-video-preview');
             miniVideo.srcObject = stream;
             document.getElementById('mini-video-container').classList.remove('hidden');
-
             renderQuestions();
             startRecording();
             startTimer(15 * 60);
-
-            runLiveProctoringLoop();
-        }
-
-        async function runLiveProctoringLoop() {
-            if (!isTestActive) return;
-            const video = document.getElementById('mini-video-preview');
-
-            if (video.readyState === 4) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 64; canvas.height = 48;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                
-                let totalBrightness = 0;
-                for (let i = 0; i < imgData.length; i += 4) {
-                    totalBrightness += (imgData[i] * 0.299) + (imgData[i+1] * 0.587) + (imgData[i+2] * 0.114);
-                }
-                let avgBrightness = totalBrightness / (canvas.width * canvas.height);
-
-                if (avgBrightness < 20) { 
-                    triggerViolation("LOW LIGHT DETECTED", "Your environment is too dark. Turn on the lights to continue.", false);
-                } else if (aiInitialized) {
-                    await faceDetection.send({image: video});
-                }
-            }
-            setTimeout(runLiveProctoringLoop, 600);
         }
 
         function startRecording() {
-            // Yahan Codec set kiya hai limit ke andar rakhne ke liye
-            let options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 50000 }; 
+            let options = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 400000, audioBitsPerSecond: 32000 }; 
             try {
                 mediaRecorder = new MediaRecorder(stream, options);
             } catch (e) {
@@ -451,24 +414,11 @@
             mediaRecorder.start();
         }
 
-        document.addEventListener('fullscreenchange', () => {
-            if (isTestActive && !document.fullscreenElement) {
-                triggerViolation("FULL-SCREEN EXITED", "You have exited full-screen mode! Return immediately.", true);
-            }
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (isTestActive && document.hidden) {
-                triggerViolation("TAB SWITCH DETECTED", "Browser tab switch detected! This is a strict security violation.", true);
-            }
-        });
-
         function triggerViolation(title, desc, requiresClick) {
             const screen = document.getElementById('security-violation-screen');
             document.getElementById('violation-title').innerText = title;
             document.getElementById('violation-desc').innerText = desc;
             document.getElementById('test-content-area').classList.add('blur-test');
-
             if (requiresClick) {
                 document.getElementById('violation-icon').className = "fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4 animate-bounce";
                 document.getElementById('resume-fullscreen-btn').classList.remove('hidden');
@@ -507,10 +457,8 @@
             isUploadingData = true; 
             
             const submitBtn = document.getElementById('submit-test-btn');
-            if(submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Processing Data...";
-            }
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Processing...";
             
             let timeTakenMs = Date.now() - testStartTime;
             let timeTakenMins = Math.floor(timeTakenMs / 60000);
@@ -527,23 +475,12 @@
             mediaRecorder.stop();
             stream.getTracks().forEach(track => track.stop());
 
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-            }
+            if (document.fullscreenElement) document.exitFullscreen();
 
             document.getElementById('screen-test').classList.add('hidden');
-            document.getElementById('mini-video-container').classList.add('hidden');
-            document.getElementById('security-violation-screen').classList.add('hidden');
             document.getElementById('screen-uploading').classList.remove('hidden');
 
-            const dataPayload = {
-                type: "data",
-                name: userName,           
-                email: userEmail,
-                whatsapp: userWhatsapp, 
-                score: percentage,        
-                timeTaken: exactTimeStr   
-            };
+            const dataPayload = { type: "data", name: userName, email: userEmail, whatsapp: userWhatsapp, score: percentage, timeTaken: exactTimeStr };
 
             fetch(GOOGLE_SCRIPT_URL, { 
                 redirect: "follow",
@@ -553,7 +490,6 @@
             })
             .then(res => res.json())
             .then(dataResponse => {
-                
                 if(dataResponse.status === "success" || dataResponse.status === "ok") {
                     
                     const blob = new Blob(recordedChunks, { type: 'video/webm' });
@@ -561,46 +497,54 @@
                     reader.readAsDataURL(blob);
                     
                     reader.onloadend = function() {
-                        const base64data = reader.result.split(',')[1];
-                        const safeEmail = userEmail.replace(/[^a-zA-Z0-9]/g, '_');
-                        const safeName = userName.replace(/[^a-zA-Z0-9]/g, '_');
-                        
                         const videoPayload = {
                             type: "video",
-                            filename: `intern_${safeName}_${safeEmail}_${Date.now()}.webm`,
+                            filename: `intern_${userName.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.webm`,
                             mimeType: 'video/webm',
-                            base64: base64data,
+                            base64: reader.result.split(',')[1],
                             email: userEmail
                         };
-
-                        fetch(GOOGLE_SCRIPT_URL, { 
-                            redirect: "follow",
-                            method: "POST", 
-                            headers: { "Content-Type": "text/plain;charset=utf-8" },
-                            body: JSON.stringify(videoPayload) 
-                        })
-                        .then(res => res.json())
-                        .then(videoResponse => {
-                            isUploadingData = false;
-                            calculateAndShowResults(true);
-                        })
-                        .catch(e => {
-                            console.log("Video Upload Error:", e);
-                            isUploadingData = false;
-                            calculateAndShowResults(true);
-                        });
+                        uploadVideoWithRetry(videoPayload, 3);
                     };
                 } else {
-                    console.log("Database response error");
-                    isUploadingData = false;
-                    calculateAndShowResults(true);
+                    showFailScreen();
                 }
             })
-            .catch(err => { 
-                console.error("Fetch Error:", err); 
-                isUploadingData = false;
-                calculateAndShowResults(true); 
+            .catch(() => showFailScreen());
+        }
+
+        function uploadVideoWithRetry(videoPayload, retriesLeft) {
+            const statusText = document.getElementById('upload-status-text');
+            if (retriesLeft < 3) statusText.innerText = `Network unstable. Retrying upload... (${retriesLeft} attempts left). DO NOT CLOSE TAB.`;
+            
+            fetch(GOOGLE_SCRIPT_URL, { 
+                redirect: "follow",
+                method: "POST", 
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(videoPayload) 
+            })
+            .then(res => res.json())
+            .then(videoResponse => {
+                if(videoResponse.status === "success" || videoResponse.status === "ok") {
+                    isUploadingData = false;
+                    calculateAndShowResults(true); 
+                } else {
+                    throw new Error("Server rejected video");
+                }
+            })
+            .catch(e => {
+                if(retriesLeft > 1) {
+                    setTimeout(() => uploadVideoWithRetry(videoPayload, retriesLeft - 1), 3000);
+                } else {
+                    showFailScreen(); 
+                }
             });
+        }
+
+        function showFailScreen() {
+            isUploadingData = false;
+            document.getElementById('screen-uploading').classList.add('hidden');
+            document.getElementById('screen-failed').classList.remove('hidden');
         }
 
         function calculateAndShowResults(isNewRequest) {
@@ -620,7 +564,7 @@
                     reviewHTML += `<p class="text-green-400 text-sm mb-2"><i class="fa-solid fa-check mr-2"></i> Q${q.id}: Correct</p>`;
                 } else {
                     reviewHTML += `<p class="text-red-400 text-sm mb-1"><i class="fa-solid fa-xmark mr-2"></i> Q${q.id}: Incorrect</p>`;
-                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <strong>${q.options[q.answer]}</strong></p>`;
+                    reviewHTML += `<p class="text-gray-400 text-xs mb-3 pl-5">Correct Answer: <b>${q.options[q.answer]}</b></p>`;
                 }
             });
 
@@ -781,10 +725,10 @@
         function startTimer(duration) {
             let timer = duration, m, s;
             let display = document.getElementById('timer');
-            let interval = setInterval(() => {
+            setInterval(() => {
                 m = parseInt(timer / 60, 10); s = parseInt(timer % 60, 10);
                 display.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-                if (--timer < 0) { clearInterval(interval); finishTestAndUpload(); }
+                if (--timer < 0) finishTestAndUpload();
             }, 1000);
         }
     </script>
